@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planify — Ton mois, maîtrisé.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c28; --border: #2a2a3a;
+    --accent: #7c5cfc; --accent2: #c084fc; --green: #22d3a0; --orange: #fb923c;
+    --red: #f87171; --text: #f0f0f8; --muted: #7070a0;
+    --card-glow: 0 0 40px rgba(124,92,252,0.08);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,0.88); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; background: linear-gradient(135deg,#fff 30%,var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .logo span { -webkit-text-fill-color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .plan-chip { font-size: 0.7rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
+  .plan-chip.free { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .plan-chip.pro { background: linear-gradient(135deg,var(--accent),var(--accent2)); color: #fff; }
+  .btn-upgrade-header { background: linear-gradient(135deg,var(--accent),var(--accent2)); color: #fff; border: none; border-radius: 10px; padding: 8px 16px; font-family: 'DM Sans',sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-upgrade-header:hover { opacity: 0.85; transform: translateY(-1px); }
+  main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+  .hero { text-align: center; margin-bottom: 48px; animation: fadeUp 0.6s ease both; }
+  .hero h1 { font-family: 'Syne',sans-serif; font-size: clamp(2rem,5vw,3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 12px; background: linear-gradient(160deg,#fff 40%,var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); font-size: 1.05rem; font-weight: 300; }
+  .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; animation: fadeUp 0.6s 0.1s ease both; }
+  @media(max-width:640px){ .setup-grid { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; box-shadow: var(--card-glow); transition: border-color 0.2s, transform 0.2s; }
+  .card:hover { border-color: rgba(124,92,252,0.3); transform: translateY(-2px); }
+  .card-label { font-family: 'Syne',sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .card h2 { font-family: 'Syne',sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
+  label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  input, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-family: 'DM Sans',sans-serif; font-size: 0.95rem; padding: 12px 16px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 16px; }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,252,0.15); }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 12px; font-family: 'DM Sans',sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; padding: 12px 20px; }
+  .btn-primary { background: linear-gradient(135deg,var(--accent),var(--accent2)); color: #fff; width: 100%; justify-content: center; padding: 14px; font-size: 1rem; }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,92,252,0.35); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+  .btn-danger:hover { background: rgba(248,113,113,0.2); }
+  .btn-sm { padding: 8px 14px; font-size: 0.82rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; animation: fadeUp 0.6s 0.2s ease both; }
+  @media(max-width:900px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:480px){ .stats-grid { grid-template-columns: 1fr; } }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; position: relative; overflow: hidden; transition: transform 0.2s; }
+  .stat-card:hover { transform: translateY(-3px); }
+  .stat-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; border-radius: 50%; opacity: 0.1; background: var(--stat-color,var(--accent)); }
+  .stat-icon { font-size: 1.4rem; margin-bottom: 12px; display: block; }
+  .stat-value { font-family: 'Syne',sans-serif; font-size: 1.9rem; font-weight: 800; color: var(--stat-color,var(--text)); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .progress-section { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 32px; animation: fadeUp 0.6s 0.3s ease both; }
+  .progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+  .progress-title { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 1.05rem; }
+  .progress-pct { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--accent2); }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 100px; height: 12px; overflow: hidden; margin-bottom: 12px; }
+  .progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(--accent),var(--accent2)); transition: width 1s cubic-bezier(0.4,0,0.2,1); position: relative; }
+  .progress-bar-fill::after { content: ''; position: absolute; top:0;right:0;bottom:0; width: 30px; background: linear-gradient(90deg,transparent,rgba(255,255,255,0.3)); animation: shimmer 2s infinite; }
+  @keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .section-title { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 1.2rem; }
+  .week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; margin-bottom: 24px; }
+  @media(max-width:700px){ .week-grid { grid-template-columns: repeat(4,1fr); } }
+  @media(max-width:400px){ .week-grid { grid-template-columns: repeat(3,1fr); } }
+  .day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; user-select: none; }
+  .day-card:hover { border-color: var(--accent); }
+  .day-card.worked { background: rgba(124,92,252,0.12); border-color: var(--accent); }
+  .day-card.today { border-color: var(--green); box-shadow: 0 0 12px rgba(34,211,160,0.2); }
+  .day-card.past { opacity: 0.5; }
+  .day-card.weekend { border-color: rgba(251,146,60,0.3); }
+  .day-card.weekend.worked { background: rgba(251,146,60,0.1); border-color: var(--orange); }
+  .day-name { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .day-num { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .day-check { position: absolute; top: 6px; right: 6px; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; display: none; align-items: center; justify-content: center; }
+  .day-card.worked .day-check { display: flex; }
+  .day-check::after { content: '✓'; color: #fff; font-size: 8px; font-weight: 900; }
+  .shift-section { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 32px; }
+  .shift-list { display: flex; flex-direction: column; gap: 10px; }
+  .shift-item { display: flex; align-items: center; justify-content: space-between; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
+  .shift-date { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.95rem; min-width: 100px; }
+  .shift-hours { color: var(--muted); font-size: 0.85rem; flex: 1; }
+  .shift-earn { font-family: 'Syne',sans-serif; font-weight: 700; color: var(--green); font-size: 0.95rem; }
+  .empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 0.9rem; }
+  .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+
+/* ===== PRO LOCK ===== */
+.pro-wrapper { position: relative; margin-bottom: 32px; border-radius: 20px; }
+.pro-blur { filter: blur(5px); pointer-events: none; user-select: none; opacity: 0.5; border-radius: 20px; overflow: hidden; }
+.pro-lock-overlay {
+position: absolute; inset: 0; z-index: 10;
+background: rgba(10,10,15,0.55); backdrop-filter: blur(1px);
+border-radius: 20px; border: 1px solid rgba(124,92,252,0.4);
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+gap: 12px; cursor: pointer; transition: background 0.2s; padding: 32px; text-align: center;
+}
+.pro-lock-overlay:hover { background: rgba(10,10,15,0.7); }
+.lock-icon { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg,var(–accent),var(–accent2)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 24px rgba(124,92,252,0.5); animation: lockPulse 2.5s ease-in-out infinite; }
+@keyframes lockPulse { 0%,100%{box-shadow:0 4px 20px rgba(124,92,252,0.4)} 50%{box-shadow:0 4px 40px rgba(124,92,252,0.8)} }
+.lock-title { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.1rem; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.lock-desc { font-size: 0.83rem; color: var(–muted); max-width: 260px; line-height: 1.5; }
+.lock-btn { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 12px; padding: 11px 26px; font-family: ‘Syne’,sans-serif; font-size: 0.87rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(124,92,252,0.4); margin-top: 4px; }
+.lock-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,92,252,0.6); }
+.pro-badge { display: inline-flex; align-items: center; background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; font-size: 0.58rem; font-weight: 800; letter-spacing: 1px; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; vertical-align: middle; margin-left: 6px; }
+
+/* PRO FEATURES */
+.feat-card { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 28px; }
+.proj-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 20px; }
+@media(max-width:600px){ .proj-row { grid-template-columns: 1fr; } }
+.proj-item { background: var(–surface2); border: 1px solid var(–border); border-radius: 14px; padding: 18px; text-align: center; }
+.proj-val { font-family: ‘Syne’,sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.proj-label { font-size: 0.75rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* SLIDER */
+input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 100px; outline: none; cursor: pointer; padding: 0; margin-bottom: 0; border: none; background: linear-gradient(90deg,var(–accent) var(–range-pct,0%),var(–surface2) var(–range-pct,0%)); }
+input[type=range]:focus { box-shadow: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: white; cursor: pointer; box-shadow: 0 2px 12px rgba(124,92,252,0.5); border: 3px solid var(–accent2); }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.slider-val { font-family: ‘Syne’,sans-serif; font-size: 1.4rem; font-weight: 800; color: var(–accent2); }
+.sim-result { margin-top: 20px; background: var(–surface2); border: 1px solid var(–border); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.sim-item-label { font-size: 0.75rem; color: var(–muted); text-transform: uppercase; margin-bottom: 4px; }
+.sim-item-val { font-family: ‘Syne’,sans-serif; font-size: 1.3rem; font-weight: 800; }
+
+/* OBJECTIF */
+.obj-input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
+.obj-input-row input { margin-bottom: 0; }
+.btn-set { background: var(–accent); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: ‘DM Sans’,sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; height: fit-content; }
+.btn-set:hover { opacity: 0.85; }
+.obj-progress-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(–muted); margin-bottom: 8px; }
+.obj-bar-bg { background: var(–surface2); border-radius: 100px; height: 10px; overflow: hidden; margin-bottom: 16px; }
+.obj-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(–green),#6ee7b7); transition: width 0.8s ease; }
+.obj-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.obj-info-item { background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 14px; text-align: center; }
+.obj-info-val { font-family: ‘Syne’,sans-serif; font-size: 1.2rem; font-weight: 800; color: var(–green); }
+.obj-info-label { font-size: 0.72rem; color: var(–muted); text-transform: uppercase; margin-top: 2px; }
+
+/* WEEK CHART */
+.earn-bar-wrap { margin-top: 20px; }
+.earn-bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.earn-bar-label { min-width: 50px; color: var(–muted); font-size: 0.75rem; }
+.earn-bar-track { flex: 1; background: var(–surface2); border-radius: 100px; height: 8px; overflow: hidden; }
+.earn-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(–accent),var(–accent2)); transition: width 0.8s ease; }
+.earn-bar-val { min-width: 64px; text-align: right; font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 0.78rem; color: var(–green); }
+
+/* MONTH NAV */
+.month-nav { display: flex; align-items: center; gap: 12px; background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 8px 16px; font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 0.9rem; width: fit-content; margin-top: 4px; }
+.month-nav button { background: none; border: none; color: var(–muted); cursor: pointer; font-size: 1rem; padding: 2px 8px; border-radius: 6px; transition: all 0.15s; }
+.month-nav button:hover { color: var(–text); background: var(–border); }
+
+/* PROMO */
+.promo-banner { background: linear-gradient(135deg,rgba(124,92,252,0.15),rgba(192,132,252,0.08)); border: 1px solid rgba(124,92,252,0.3); border-radius: 20px; padding: 28px 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; animation: fadeUp 0.6s 0.6s ease both; }
+.promo-text h3 { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.promo-text p { color: var(–muted); font-size: 0.85rem; max-width: 400px; line-height: 1.5; }
+.promo-feats { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.promo-feat { font-size: 0.8rem; color: var(–muted); }
+.promo-feat::before { content: ’✦ ’; color: var(–accent); }
+.btn-upgrade { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 14px; padding: 14px 28px; font-family: ‘Syne’,sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 4px 20px rgba(124,92,252,0.4); }
+.btn-upgrade:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,92,252,0.55); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(–surface); border: 1px solid var(–border); border-radius: 24px; padding: 40px; max-width: 500px; width: 100%; position: relative; animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; max-height: 90vh; overflow-y: auto; }
+@keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+.modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(–muted); font-size: 1.4rem; cursor: pointer; transition: color 0.2s; line-height: 1; }
+.modal-close:hover { color: var(–text); }
+.modal h2 { font-family: ‘Syne’,sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.modal > p { color: var(–muted); font-size: 0.9rem; margin-bottom: 28px; line-height: 1.6; }
+.price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.price-card { background: var(–surface2); border: 1px solid var(–border); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.price-card:hover, .price-card.selected { border-color: var(–accent); background: rgba(124,92,252,0.1); }
+.price-card.popular { border-color: var(–accent); position: relative; }
+.price-card.popular::before { content: ‘Populaire’; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; font-size: 0.62rem; font-weight: 700; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; white-space: nowrap; }
+.price-amount { font-family: ‘Syne’,sans-serif; font-size: 1.8rem; font-weight: 800; }
+.price-amount span { font-size: 0.8rem; color: var(–muted); font-weight: 400; }
+.price-label { font-size: 0.75rem; color: var(–muted); margin-top: 4px; }
+.modal-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.modal-feat { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(–muted); }
+.modal-feat .icon { color: var(–green); }
+.divider { border: none; border-top: 1px solid var(–border); margin: 8px 0 20px; }
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(–surface); border: 1px solid var(–border); border-radius: 14px; padding: 14px 24px; font-size: 0.9rem; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.hidden { display: none !important; }
+@keyframes fadeUp { from{transform:translateY(24px);opacity:0} to{transform:translateY(0);opacity:1} }
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="logo">Plani<span>fy</span></div>
+  <div class="header-right">
+    <span id="headerDate" style="font-size:0.8rem;color:var(--muted)"></span>
+    <div class="plan-chip free" id="planChip">Gratuit</div>
+    <button class="btn-upgrade-header" id="headerUpgradeBtn" onclick="openModal()">✦ Passer Pro</button>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Ton mois,<br>sous contrôle.</h1>
+    <p>Planifie, suis tes gains, simule et atteins tes objectifs — en temps réel.</p>
+  </div>
+
+  <!-- CONFIG -->
+
+  <div class="setup-grid">
+    <div class="card">
+      <div class="card-label"><span class="dot"></span>Mon salaire</div>
+      <h2>💶 Configuration</h2>
+      <label>Salaire mensuel net (€)</label>
+      <input type="number" id="salaire" placeholder="ex: 2200" min="0">
+      <label>Jours travaillés par mois</label>
+      <input type="number" id="joursParMois" placeholder="ex: 22" min="1" max="31">
+      <label>Mode de calcul</label>
+      <select id="modeCalc">
+        <option value="jours">Par jours travaillés</option>
+        <option value="heures">Par heures travaillées</option>
+      </select>
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Enregistrer</button>
+    </div>
+    <div class="card">
+      <div class="card-label"><span class="dot"></span>Mes horaires</div>
+      <h2>⏱ Paramètres</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label>Début</label><input type="time" id="heureDebut" value="09:00"></div>
+        <div><label>Fin</label><input type="time" id="heureFin" value="17:00"></div>
+      </div>
+      <label>Pause (minutes)</label>
+      <input type="number" id="pause" value="60" min="0" max="180">
+      <label>Mois affiché</label>
+      <div class="month-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span id="monthDisplay">—</span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+
+  <div class="stats-grid">
+    <div class="stat-card" style="--stat-color:var(--green)">
+      <span class="stat-icon">💰</span>
+      <div class="stat-value" id="statGagne">0 €</div>
+      <div class="stat-label">Déjà gagné</div>
+    </div>
+    <div class="stat-card" style="--stat-color:var(--accent2)">
+      <span class="stat-icon">📆</span>
+      <div class="stat-value" id="statRestantJours">—</div>
+      <div class="stat-label">Jours restants</div>
+    </div>
+    <div class="stat-card" style="--stat-color:var(--orange)">
+      <span class="stat-icon">⚡</span>
+      <div class="stat-value" id="statRestantSalaire">0 €</div>
+      <div class="stat-label">Salaire restant</div>
+    </div>
+    <div class="stat-card" style="--stat-color:var(--accent)">
+      <span class="stat-icon">🕐</span>
+      <div class="stat-value" id="statHeures">0 h</div>
+      <div class="stat-label">Heures effectuées</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+
+  <div class="progress-section">
+    <div class="progress-header">
+      <div class="progress-title">Progression du mois</div>
+      <div class="progress-pct" id="pctDisplay">0%</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-meta">
+      <span id="progressLeft">Configure ton salaire pour commencer</span>
+      <span id="progressRight"></span>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+
+  <div class="card" style="margin-bottom:32px;animation:fadeUp 0.6s 0.35s ease both;">
+    <div class="section-header">
+      <div class="section-title">📅 Planning du mois</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="resetMonth()">🗑 Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="cocheToutJourOuvrable()">✅ Jours ouvrables</button>
+      </div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Clique sur un jour pour le marquer travaillé. <span style="color:var(--orange)">■</span> Weekend &nbsp;<span style="color:var(--green)">■</span> Aujourd'hui</p>
+    <div class="week-grid" id="calendarGrid"></div>
+  </div>
+
+  <!-- SHIFTS -->
+
+  <div class="shift-section" style="animation:fadeUp 0.6s 0.4s ease both;">
+    <div class="section-header">
+      <div class="section-title">🗒 Journées travaillées</div>
+      <span style="font-size:0.82rem;color:var(--muted)" id="shiftCount">0 jour(s)</span>
+    </div>
+    <div class="shift-list" id="shiftList">
+      <div class="empty-state"><span class="emoji">👆</span>Clique sur un jour dans le calendrier</div>
+    </div>
+    <div id="weekChart"></div>
+  </div>
+
+  <!-- PRO 1 : PROJECTION -->
+
+  <div class="pro-wrapper" id="projWrapper" style="animation:fadeUp 0.6s 0.45s ease both;">
+    <div class="pro-blur" id="projBlur">
+      <div class="feat-card">
+        <div class="section-header">
+          <div class="section-title">🔮 Projection fin de mois <span class="pro-badge">✦ Pro</span></div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;">Si tu continues à ce rythme, voilà ce que tu vas gagner en fin de mois.</p>
+        <div class="proj-row">
+          <div class="proj-item">
+            <div class="proj-val" style="color:var(--green)" id="projTotal">—</div>
+            <div class="proj-label">Salaire projeté</div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-val" style="color:var(--accent2)" id="projJoursManquants">—</div>
+            <div class="proj-label">Jours encore à faire</div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-val" style="color:var(--orange)" id="projRythme">—</div>
+            <div class="proj-label">Gain / jour travaillé</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pro-lock-overlay" onclick="openModal()">
+      <div class="lock-icon">🔮</div>
+      <div class="lock-title">Projection intelligente</div>
+      <div class="lock-desc">Vois exactement combien tu gagneras en fin de mois selon ton rythme actuel.</div>
+      <button class="lock-btn">Débloquer avec Pro →</button>
+    </div>
+  </div>
+
+  <!-- PRO 2 : SIMULATEUR -->
+
+  <div class="pro-wrapper" id="simWrapper" style="animation:fadeUp 0.6s 0.5s ease both;">
+    <div class="pro-blur" id="simBlur">
+      <div class="feat-card">
+        <div class="section-header">
+          <div class="section-title">⚡ Simulateur heures sup <span class="pro-badge">✦ Pro</span></div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Glisse le curseur pour voir ce que tu gagnes si tu travailles plus.</p>
+        <div class="slider-header">
+          <label style="margin:0;font-size:0.9rem;">Jours supplémentaires</label>
+          <div class="slider-val" id="simSliderVal">+0 j</div>
+        </div>
+        <div style="margin:12px 0 4px;">
+          <input type="range" id="simSlider" min="0" max="15" value="0" oninput="updateSim(this.value)">
+        </div>
+        <div class="sim-result">
+          <div>
+            <div class="sim-item-label">Gain supplémentaire</div>
+            <div class="sim-item-val" id="simGainExtra" style="color:var(--green)">+0 €</div>
+          </div>
+          <div>
+            <div class="sim-item-label">Total du mois</div>
+            <div class="sim-item-val" id="simTotal" style="color:var(--accent2)">0 €</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pro-lock-overlay" onclick="openModal()">
+      <div class="lock-icon">⚡</div>
+      <div class="lock-title">Simulateur heures sup</div>
+      <div class="lock-desc">Glisse un curseur pour voir combien tu gagnes si tu travailles plus ce mois-ci.</div>
+      <button class="lock-btn">Débloquer avec Pro →</button>
+    </div>
+  </div>
+
+  <!-- PRO 3 : OBJECTIF -->
+
+  <div class="pro-wrapper" id="objWrapper" style="animation:fadeUp 0.6s 0.55s ease both;">
+    <div class="pro-blur" id="objBlur">
+      <div class="feat-card">
+        <div class="section-header">
+          <div class="section-title">🎯 Objectif d'épargne <span class="pro-badge">✦ Pro</span></div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Fixe un montant cible et suis ta progression automatiquement.</p>
+        <div class="obj-input-row">
+          <div>
+            <label>Mon objectif ce mois-ci (€)</label>
+            <input type="number" id="objInput" placeholder="ex: 500" min="0" style="margin-bottom:0;">
+          </div>
+          <button class="btn-set" onclick="setObjectif()">Définir</button>
+        </div>
+        <div id="objProgressWrap" style="display:none;">
+          <div class="obj-progress-label">
+            <span id="objProgressLabel">0 € / 0 €</span>
+            <span id="objProgressPct" style="color:var(--green);font-weight:700;">0%</span>
+          </div>
+          <div class="obj-bar-bg"><div class="obj-bar-fill" id="objBarFill" style="width:0%"></div></div>
+          <div class="obj-info">
+            <div class="obj-info-item">
+              <div class="obj-info-val" id="objJoursNecessaires">—</div>
+              <div class="obj-info-label">Jours nécessaires total</div>
+            </div>
+            <div class="obj-info-item">
+              <div class="obj-info-val" id="objJoursRestants" style="color:var(--accent2)">—</div>
+              <div class="obj-info-label">Jours restants à faire</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pro-lock-overlay" onclick="openModal()">
+      <div class="lock-icon">🎯</div>
+      <div class="lock-title">Objectif d'épargne</div>
+      <div class="lock-desc">Fixe un montant à atteindre ce mois-ci et suis ta progression en temps réel.</div>
+      <button class="lock-btn">Débloquer avec Pro →</button>
+    </div>
+  </div>
+
+  <!-- PROMO BANNER -->
+
+  <div class="promo-banner" id="promoBanner">
+    <div class="promo-text">
+      <h3>✦ Planify Pro — Débloque tout</h3>
+      <p>Projection, simulateur d'heures sup, objectifs d'épargne, graphiques et export PDF.</p>
+      <div class="promo-feats">
+        <div class="promo-feat">Projection fin de mois</div>
+        <div class="promo-feat">Simulateur heures sup</div>
+        <div class="promo-feat">Objectifs épargne</div>
+        <div class="promo-feat">Export PDF</div>
+        <div class="promo-feat">Historique 12 mois</div>
+      </div>
+    </div>
+    <button class="btn-upgrade" onclick="openModal()">Essai gratuit 7 jours →</button>
+  </div>
+</main>
+
+<!-- MODAL PRO -->
+
+<div class="modal-overlay" id="proModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2>✦ Planify Pro</h2>
+    <p>Prends le contrôle total de tes finances. 7 jours gratuits, sans engagement, sans carte bancaire.</p>
+    <div class="price-cards">
+      <div class="price-card" onclick="selectPlan(this)">
+        <div class="price-amount">4,99<span>€/mois</span></div>
+        <div class="price-label">Mensuel</div>
+      </div>
+      <div class="price-card popular selected" onclick="selectPlan(this)">
+        <div class="price-amount">2,99<span>€/mois</span></div>
+        <div class="price-label">Annuel · Économise 48%</div>
+      </div>
+    </div>
+    <div class="modal-features">
+      <div class="modal-feat"><span class="icon">✓</span> Projection intelligente de fin de mois</div>
+      <div class="modal-feat"><span class="icon">✓</span> Simulateur d'heures supplémentaires</div>
+      <div class="modal-feat"><span class="icon">✓</span> Objectifs d'épargne personnalisés</div>
+      <div class="modal-feat"><span class="icon">✓</span> Graphique des gains par semaine</div>
+      <div class="modal-feat"><span class="icon">✓</span> Export PDF mensuel (impôts, RH…)</div>
+      <div class="modal-feat"><span class="icon">✓</span> Historique des 12 derniers mois</div>
+      <div class="modal-feat"><span class="icon">✓</span> Multi-contrats / plusieurs employeurs</div>
+    </div>
+    <button class="btn btn-primary" onclick="activatePro()" style="margin-bottom:12px;">🚀 Commencer l'essai gratuit</button>
+    <p style="text-align:center;font-size:0.73rem;color:var(--muted);margin:0;">Aucune carte bancaire · Annulable à tout moment</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let isPro = false;
+  let state = {
+    salaire: 0, joursParMois: 22, heureDebut: '09:00', heureFin: '17:00',
+    pause: 60, modeCalc: 'jours', workedDays: {},
+    currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear(),
+    objectif: 0
+  };
+
+  const today = new Date();
+  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const DAYS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  loadState();
+  document.getElementById('headerDate').textContent = today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  renderCalendar();
+  updateStats();
+  updateMonthDisplay();
+  applyProState();
+
+  function updateMonthDisplay() {
+    document.getElementById('monthDisplay').textContent = MONTHS[state.currentMonth]+' '+state.currentYear;
+  }
+  function changeMonth(dir) {
+    state.currentMonth += dir;
+    if(state.currentMonth>11){state.currentMonth=0;state.currentYear++;}
+    if(state.currentMonth<0){state.currentMonth=11;state.currentYear--;}
+    updateMonthDisplay(); renderCalendar(); updateStats();
+  }
+  function saveConfig() {
+    state.salaire = parseFloat(document.getElementById('salaire').value)||0;
+    state.joursParMois = parseInt(document.getElementById('joursParMois').value)||22;
+    state.heureDebut = document.getElementById('heureDebut').value;
+    state.heureFin = document.getElementById('heureFin').value;
+    state.pause = parseInt(document.getElementById('pause').value)||60;
+    state.modeCalc = document.getElementById('modeCalc').value;
+    saveStateLocal(); updateStats(); showToast('✅ Configuration enregistrée !');
+  }
+  function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+  function getMonthKey(){return `${state.currentYear}-${state.currentMonth}`;}
+  function getWorkedDays(){return state.workedDays[getMonthKey()]||[];}
+  function toggleDay(d) {
+    const key=getMonthKey();
+    if(!state.workedDays[key])state.workedDays[key]=[];
+    const idx=state.workedDays[key].indexOf(d);
+    if(idx>=0)state.workedDays[key].splice(idx,1);
+    else{state.workedDays[key].push(d);state.workedDays[key].sort((a,b)=>a-b);}
+    saveStateLocal(); renderCalendar(); updateStats();
+  }
+  function renderCalendar() {
+    const grid=document.getElementById('calendarGrid');
+    grid.innerHTML='';
+    const dim=getDaysInMonth(state.currentYear,state.currentMonth);
+    const worked=getWorkedDays();
+    for(let d=1;d<=dim;d++){
+      const date=new Date(state.currentYear,state.currentMonth,d);
+      const dow=date.getDay();
+      const isW=dow===0||dow===6;
+      const isT=d===today.getDate()&&state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear();
+      const isP=date<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      const isWk=worked.includes(d);
+      const el=document.createElement('div');
+      el.className='day-card'+(isWk?' worked':'')+(isT?' today':'')+(isP&&!isT?' past':'')+(isW?' weekend':'');
+      el.innerHTML=`<div class="day-check"></div><div class="day-name">${DAYS[dow]}</div><div class="day-num">${d}</div>`;
+      el.onclick=()=>toggleDay(d);
+      grid.appendChild(el);
+    }
+  }
+  function hoursPerDay(){
+    const [sh,sm]=state.heureDebut.split(':').map(Number);
+    const [eh,em]=state.heureFin.split(':').map(Number);
+    return Math.max(0,((eh*60+em)-(sh*60+sm)-state.pause)/60);
+  }
+  function getEarnPerDay(){
+    const hpd=hoursPerDay();
+    if(state.modeCalc==='jours')return state.joursParMois>0?state.salaire/state.joursParMois:0;
+    return state.joursParMois>0?(state.salaire/(state.joursParMois*hpd))*hpd:0;
+  }
+  function updateStats(){
+    const worked=getWorkedDays();
+    const nb=worked.length;
+    const dim=getDaysInMonth(state.currentYear,state.currentMonth);
+    const hpd=hoursPerDay();
+    const epd=getEarnPerDay();
+    const gagne=nb*epd;
+    const restant=Math.max(0,state.salaire-gagne);
+    let joursOuvR=0;
+    if(state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()){
+      for(let d=today.getDate()+1;d<=dim;d++){const dow=new Date(state.currentYear,state.currentMonth,d).getDay();if(dow!==0&&dow!==6)joursOuvR++;}
+    }
+    let pct=state.joursParMois>0?Math.min(100,Math.round((nb/state.joursParMois)*100)):0;
+    document.getElementById('statGagne').textContent=fmt(gagne);
+    document.getElementById('statRestantJours').textContent=state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()?joursOuvR+' j':'—';
+    document.getElementById('statRestantSalaire').textContent=fmt(restant);
+    document.getElementById('statHeures').textContent=Math.round(nb*hpd)+' h';
+    document.getElementById('pctDisplay').textContent=pct+'%';
+    document.getElementById('progressBar').style.width=pct+'%';
+    document.getElementById('progressLeft').textContent=nb+' / '+state.joursParMois+' jours effectués';
+    document.getElementById('progressRight').textContent=state.salaire>0?fmt(gagne)+' / '+fmt(state.salaire):'';
+    renderShiftList(worked,epd,hpd);
+    if(isPro){
+      renderWeekChart(worked,epd);
+      updateProjection(nb,epd,dim);
+      updateSim(document.getElementById('simSlider').value,true);
+      if(state.objectif>0)updateObjectifProgress(gagne,epd);
+    }
+  }
+  function renderShiftList(worked,epd,hpd){
+    const list=document.getElementById('shiftList');
+    document.getElementById('shiftCount').textContent=worked.length+' jour(s)';
+    if(!worked.length){list.innerHTML='<div class="empty-state"><span class="emoji">👆</span>Clique sur un jour dans le calendrier</div>';return;}
+    list.innerHTML='';
+    worked.forEach(d=>{
+      const dow=DAYS[new Date(state.currentYear,state.currentMonth,d).getDay()];
+      const item=document.createElement('div');
+      item.className='shift-item';
+      item.innerHTML=`<div class="shift-date">${dow} ${d} ${MONTHS[state.currentMonth].substring(0,3)}.</div><div class="shift-hours">⏱ ${state.heureDebut} → ${state.heureFin} (${hpd.toFixed(1)}h)</div><div class="shift-earn">+${fmt(epd)}</div><button class="btn btn-danger" onclick="toggleDay(${d})">✕</button>`;
+      list.appendChild(item);
+    });
+  }
+  function renderWeekChart(worked,epd){
+    const c=document.getElementById('weekChart');
+    if(!worked.length){c.innerHTML='';return;}
+    const weeks={};
+    worked.forEach(d=>{const wk=Math.ceil(d/7);weeks[wk]=(weeks[wk]||0)+1;});
+    const maxE=Math.max(...Object.values(weeks))*epd;
+    c.innerHTML='<hr class="divider"><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:12px;color:var(--muted);">Gains par semaine</div>';
+    Object.entries(weeks).forEach(([wk,days])=>{
+      const earn=days*epd;
+      const pct=maxE>0?(earn/maxE*100):0;
+      c.innerHTML+=`<div class="earn-bar-item"><div class="earn-bar-label">Sem. ${wk}</div><div class="earn-bar-track"><div class="earn-bar-fill" style="width:${pct}%"></div></div><div class="earn-bar-val">${fmt(earn)}</div></div>`;
+    });
+  }
+  function countOuvrables(y,m,from,to){
+    from=from||1; to=to||getDaysInMonth(y,m);
+    let n=0;
+    for(let d=from;d<=to;d++){const dow=new Date(y,m,d).getDay();if(dow!==0&&dow!==6)n++;}
+    return n;
+  }
+  function updateProjection(nb,epd,dim){
+    const totOuvr=countOuvrables(state.currentYear,state.currentMonth);
+    const dayNow=state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()?today.getDate():dim;
+    const passedOuvr=countOuvrables(state.currentYear,state.currentMonth,1,dayNow);
+    const rythme=passedOuvr>0?nb/passedOuvr:0;
+    const projTotal=rythme*totOuvr*epd;
+    const projFin=Math.max(0,Math.round(rythme*totOuvr)-nb);
+    document.getElementById('projTotal').textContent=fmt(projTotal);
+    document.getElementById('projJoursManquants').textContent=projFin+' j';
+    document.getElementById('projRythme').textContent=fmt(epd)+'/j';
+  }
+  function updateSim(val, silent){
+    val=parseInt(val)||0;
+    const epd=getEarnPerDay();
+    const worked=getWorkedDays();
+    const actuel=worked.length*epd;
+    const extra=val*epd;
+    document.getElementById('simSliderVal').textContent='+'+val+' j';
+    document.getElementById('simGainExtra').textContent='+'+fmt(extra);
+    document.getElementById('simTotal').textContent=fmt(actuel+extra);
+    const slider=document.getElementById('simSlider');
+    const pct=((val-slider.min)/(slider.max-slider.min))*100;
+    slider.style.setProperty('--range-pct',pct+'%');
+  }
+  function setObjectif(){
+    const val=parseFloat(document.getElementById('objInput').value)||0;
+    state.objectif=val;
+    saveStateLocal();
+    if(val>0){
+      document.getElementById('objProgressWrap').style.display='block';
+      updateObjectifProgress(getWorkedDays().length*getEarnPerDay(),getEarnPerDay());
+      showToast('🎯 Objectif : '+fmt(val));
+    }
+  }
+  function updateObjectifProgress(gagne,epd){
+    if(!state.objectif)return;
+    const pct=Math.min(100,Math.round((gagne/state.objectif)*100));
+    const joursN=epd>0?Math.ceil(state.objectif/epd):0;
+    const joursR=Math.max(0,joursN-getWorkedDays().length);
+    document.getElementById('objProgressLabel').textContent=fmt(gagne)+' / '+fmt(state.objectif);
+    document.getElementById('objProgressPct').textContent=pct+'%';
+    document.getElementById('objBarFill').style.width=pct+'%';
+    document.getElementById('objJoursNecessaires').textContent=joursN+' j';
+    document.getElementById('objJoursRestants').textContent=joursR+' j';
+    document.getElementById('objProgressWrap').style.display='block';
+  }
+  function activatePro(){
+    isPro=true; closeModal(); applyProState(); updateStats();
+    showToast('🎉 Bienvenue dans Planify Pro !');
+  }
+  function applyProState(){
+    ['proj','sim','obj'].forEach(id=>{
+      const blur=document.getElementById(id+'Blur');
+      const overlay=document.getElementById(id+'Wrapper').querySelector('.pro-lock-overlay');
+      if(isPro){
+        blur.style.filter='none'; blur.style.opacity='1'; blur.style.pointerEvents='auto';
+        overlay.style.display='none';
+      } else {
+        blur.style.filter='blur(5px)'; blur.style.opacity='0.5'; blur.style.pointerEvents='none';
+        overlay.style.display='flex';
+      }
+    });
+    document.getElementById('planChip').textContent=isPro?'✦ Pro':'Gratuit';
+    document.getElementById('planChip').className='plan-chip '+(isPro?'pro':'free');
+    const hb=document.getElementById('headerUpgradeBtn');
+    hb.style.display=isPro?'none':'';
+    document.getElementById('promoBanner').style.display=isPro?'none':'flex';
+    if(isPro&&state.objectif){document.getElementById('objInput').value=state.objectif;}
+  }
+  function cocheToutJourOuvrable(){
+    const key=getMonthKey();const dim=getDaysInMonth(state.currentYear,state.currentMonth);
+    state.workedDays[key]=[];
+    for(let d=1;d<=dim;d++){const dow=new Date(state.currentYear,state.currentMonth,d).getDay();if(dow!==0&&dow!==6)state.workedDays[key].push(d);}
+    saveStateLocal();renderCalendar();updateStats();showToast('✅ Tous les jours ouvrables cochés !');
+  }
+  function resetMonth(){
+    state.workedDays[getMonthKey()]=[];saveStateLocal();renderCalendar();updateStats();showToast('🗑 Planning réinitialisé');
+  }
+  function fmt(n){return (Math.round(n*100)/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
+  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+  function openModal(){document.getElementById('proModal').classList.add('open');}
+  function closeModal(){document.getElementById('proModal').classList.remove('open');}
+  document.getElementById('proModal').addEventListener('click',e=>{if(e.target===document.getElementById('proModal'))closeModal();});
+  function selectPlan(el){document.querySelectorAll('.price-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+  function saveStateLocal(){try{localStorage.setItem('planify_v2',JSON.stringify({...state,isPro}));}catch(e){}}
+  function loadState(){
+    try{
+      const s=localStorage.getItem('planify_v2');
+      if(s){
+        const p=JSON.parse(s);state={...state,...p};isPro=p.isPro||false;
+        document.getElementById('salaire').value=state.salaire||'';
+        document.getElementById('joursParMois').value=state.joursParMois||22;
+        document.getElementById('heureDebut').value=state.heureDebut||'09:00';
+        document.getElementById('heureFin').value=state.heureFin||'17:00';
+        document.getElementById('pause').value=state.pause||60;
+        document.getElementById('modeCalc').value=state.modeCalc||'jours';
+        if(state.objectif)document.getElementById('objInput').value=state.objectif;
+      }
+    }catch(e){}
+  }
+</script>
+
+</body>
+</html>
