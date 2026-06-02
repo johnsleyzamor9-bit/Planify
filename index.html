@@ -4,767 +4,870 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planify — Ton mois, maîtrisé.</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Planify 2.0 — Votre espace financier, sur mesure</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c28; --border: #2a2a3a;
-    --accent: #7c5cfc; --accent2: #c084fc; --green: #22d3a0; --orange: #fb923c;
-    --red: #f87171; --text: #f0f0f8; --muted: #7070a0;
-  }
-  html { scroll-behavior: smooth; color-scheme: dark; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg) !important; color: var(--text) !important; min-height: 100vh; overflow-x: hidden; }
-
-/* ACCOUNT BANNER - Optional login */
-.account-banner {
-background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(192,132,252,0.05));
-border-bottom: 1px solid rgba(124,92,252,0.2);
-padding: 10px 24px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 12px;
-flex-wrap: wrap;
+:root {
+  --bg: #04040d;
+  --surface: #09091a;
+  --card: #0e0e22;
+  --card2: #13132a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  /* Salarié = violet */
+  --sal: #7c5cfc;
+  --sal-g: rgba(124,92,252,0.18);
+  --sal-glow: rgba(124,92,252,0.28);
+  /* Freelance = amber */
+  --free: #f59e0b;
+  --free-g: rgba(245,158,11,0.15);
+  --free-glow: rgba(245,158,11,0.25);
+  /* Entreprise = sky */
+  --ent: #0ea5e9;
+  --ent-g: rgba(14,165,233,0.15);
+  --ent-glow: rgba(14,165,233,0.25);
+  /* Global */
+  --emerald: #00e5a0;
+  --rose: #fb7185;
+  --text: #f0f0fa;
+  --muted: #5a5a7a;
+  --muted2: #8888aa;
+  --r: 14px;
 }
-.account-banner p { font-size: 0.82rem; color: var(–muted); }
-.account-banner p span { color: var(–accent2); }
-.banner-btns { display: flex; gap: 8px; }
-.btn-banner-login { background: none; border: 1px solid var(–border); color: var(–muted); border-radius: 8px; padding: 6px 14px; font-size: 0.78rem; cursor: pointer; font-family: ‘DM Sans’,sans-serif; transition: all 0.2s; }
-.btn-banner-login:hover { border-color: var(–accent); color: var(–accent); }
-.btn-banner-signup { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: ‘DM Sans’,sans-serif; transition: all 0.2s; }
-.btn-banner-signup:hover { opacity: 0.85; }
 
-/* HEADER */
-header { position: sticky; top: 0; z-index: 100; background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(–border); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.4rem; background: linear-gradient(135deg,#fff 30%,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.logo span { -webkit-text-fill-color: var(–accent); }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.plan-chip { font-size: 0.7rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
-.plan-chip.free { background: var(–surface2); color: var(–muted); border: 1px solid var(–border); }
-.plan-chip.pro { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; }
-.user-chip { display: flex; align-items: center; gap: 8px; background: var(–surface2); border: 1px solid var(–border); border-radius: 20px; padding: 5px 12px; font-size: 0.78rem; color: var(–muted); }
-.user-avatar { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,var(–accent),var(–accent2)); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 800; color: #fff; }
-.btn-upgrade-header { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-family: ‘DM Sans’,sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-.btn-upgrade-header:hover { opacity: 0.85; }
-.btn-logout { background: none; border: 1px solid var(–border); color: var(–muted); border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; cursor: pointer; font-family: ‘DM Sans’,sans-serif; transition: all 0.2s; }
-.btn-logout:hover { border-color: var(–red); color: var(–red); }
-.saving-dot { width: 6px; height: 6px; border-radius: 50%; background: var(–green); animation: blink 1.5s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+- { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(–bg); color:var(–text); font-family:‘Cabinet Grotesk’,sans-serif; overflow-x:hidden; }
 
-/* MAIN */
-main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
-.hero { text-align: center; margin-bottom: 48px; animation: fadeUp 0.6s ease both; }
-.hero h1 { font-family: ‘Syne’,sans-serif; font-size: clamp(1.8rem,5vw,3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 12px; background: linear-gradient(160deg,#fff 40%,var(–muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.hero p { color: var(–muted); font-size: 1rem; font-weight: 300; }
+/* MESH */
+.mesh { position:fixed; inset:0; z-index:0; pointer-events:none;
+background:
+radial-gradient(ellipse 700px 500px at 5% 10%, rgba(124,92,252,0.07) 0%, transparent 70%),
+radial-gradient(ellipse 600px 400px at 95% 90%, rgba(14,165,233,0.06) 0%, transparent 70%),
+radial-gradient(ellipse 500px 300px at 50% 50%, rgba(245,158,11,0.03) 0%, transparent 70%);
+}
 
-.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; animation: fadeUp 0.6s 0.1s ease both; }
-@media(max-width:640px){ .setup-grid { grid-template-columns: 1fr; } }
-.card { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 28px; transition: border-color 0.2s, transform 0.2s; }
-.card:hover { border-color: rgba(124,92,252,0.3); transform: translateY(-2px); }
-.card-label { font-family: ‘Syne’,sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.card-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(–accent); }
-.card h2 { font-family: ‘Syne’,sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
-label { display: block; font-size: 0.82rem; color: var(–muted); margin-bottom: 6px; font-weight: 500; }
-input, select { width: 100%; background: var(–surface2) !important; border: 1px solid var(–border); border-radius: 12px; color: var(–text) !important; font-family: ‘DM Sans’,sans-serif; font-size: 0.95rem; padding: 12px 16px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 16px; }
-input:focus, select:focus { border-color: var(–accent); box-shadow: 0 0 0 3px rgba(124,92,252,0.15); }
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+/* NAV */
+nav {
+position:sticky; top:0; z-index:100;
+display:flex; align-items:center; justify-content:space-between;
+padding:0 48px; height:66px;
+background:rgba(4,4,13,0.85); backdrop-filter:blur(24px);
+border-bottom:1px solid var(–border);
+}
+.logo { display:flex; align-items:center; gap:10px; font-size:1.45rem; font-weight:900; letter-spacing:-0.5px; text-decoration:none; color:var(–text); }
+.logo-mark { width:34px; height:34px; background:linear-gradient(135deg,var(–sal),var(–ent)); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; box-shadow:0 0 20px var(–sal-glow); }
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a { color:var(–muted2); text-decoration:none; font-size:0.9rem; font-weight:600; transition:color .2s; }
+.nav-links a:hover { color:var(–text); }
+.nav-right { display:flex; gap:10px; }
+.btn-ghost { padding:8px 18px; border-radius:9px; background:transparent; color:var(–muted2); font-weight:700; font-size:0.875rem; border:1px solid var(–border2); cursor:pointer; font-family:‘Cabinet Grotesk’,sans-serif; transition:all .2s; }
+.btn-ghost:hover { color:var(–text); border-color:rgba(255,255,255,.25); }
+.btn-cta { padding:9px 22px; border-radius:9px; background:var(–sal); color:#fff; font-weight:800; font-size:0.875rem; border:none; cursor:pointer; font-family:‘Cabinet Grotesk’,sans-serif; transition:all .2s; box-shadow:0 0 20px var(–sal-glow); }
+.btn-cta:hover { opacity:.88; transform:translateY(-1px); }
 
-.btn { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 12px; font-family: ‘DM Sans’,sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; padding: 12px 20px; }
-.btn-primary { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; width: 100%; justify-content: center; padding: 14px; font-size: 1rem; }
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,92,252,0.35); }
-.btn-ghost { background: var(–surface2); color: var(–text); border: 1px solid var(–border); }
-.btn-ghost:hover { border-color: var(–accent); color: var(–accent); }
-.btn-danger { background: rgba(248,113,113,0.1); color: var(–red); border: 1px solid rgba(248,113,113,0.2); padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
-.btn-sm { padding: 8px 14px; font-size: 0.82rem; }
+/* HERO */
+.hero { position:relative; z-index:1; text-align:center; padding:88px 24px 64px; max-width:860px; margin:0 auto; }
+.eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(124,92,252,.1); border:1px solid rgba(124,92,252,.25); color:#a78bfa; padding:6px 16px; border-radius:100px; font-size:0.78rem; font-weight:700; margin-bottom:28px; animation:up .6s ease both; }
+.pulse { width:6px; height:6px; background:#a78bfa; border-radius:50%; animation:blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+h1 { font-size:clamp(2.6rem,6vw,4.8rem); font-weight:900; line-height:1.05; letter-spacing:-2px; margin-bottom:20px; animation:up .6s .08s ease both; }
+h1 em { font-style:normal; background:linear-gradient(135deg,var(–sal),var(–ent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero-desc { font-size:1.05rem; color:var(–muted2); line-height:1.7; max-width:540px; margin:0 auto 36px; animation:up .6s .16s ease both; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; animation: fadeUp 0.6s 0.2s ease both; }
-@media(max-width:900px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:480px){ .stats-grid { grid-template-columns: 1fr; } }
-.stat-card { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 24px; position: relative; overflow: hidden; transition: transform 0.2s; }
-.stat-card:hover { transform: translateY(-3px); }
-.stat-card::before { content: ‘’; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; border-radius: 50%; opacity: 0.1; background: var(–stat-color,var(–accent)); }
-.stat-icon { font-size: 1.4rem; margin-bottom: 12px; display: block; }
-.stat-value { font-family: ‘Syne’,sans-serif; font-size: 1.9rem; font-weight: 800; color: var(–stat-color,var(–text)); line-height: 1; margin-bottom: 4px; }
-.stat-label { font-size: 0.78rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.5px; }
+/* SPACE SELECTOR — the key piece */
+.space-selector {
+position:relative; z-index:1;
+max-width:960px; margin:0 auto;
+padding:0 24px 80px;
+animation:up .7s .3s ease both;
+}
 
-.progress-section { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 28px; margin-bottom: 32px; animation: fadeUp 0.6s 0.3s ease both; }
-.progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
-.progress-title { font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 1.05rem; }
-.progress-pct { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.5rem; color: var(–accent2); }
-.progress-bar-wrap { background: var(–surface2); border-radius: 100px; height: 12px; overflow: hidden; margin-bottom: 12px; }
-.progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(–accent),var(–accent2)); transition: width 1s cubic-bezier(0.4,0,0.2,1); position: relative; }
-.progress-bar-fill::after { content: ‘’; position: absolute; top:0;right:0;bottom:0; width: 30px; background: linear-gradient(90deg,transparent,rgba(255,255,255,0.3)); animation: shimmer 2s infinite; }
-@keyframes shimmer { 0%,100%{opacity:0} 50%{opacity:1} }
-.progress-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(–muted); }
+.selector-label {
+text-align:center; font-size:0.75rem; font-weight:700; text-transform:uppercase;
+letter-spacing:2px; color:var(–muted2); margin-bottom:16px;
+}
 
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-.section-title { font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 1.2rem; }
-.week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; margin-bottom: 24px; }
-@media(max-width:700px){ .week-grid { grid-template-columns: repeat(4,1fr); } }
-@media(max-width:400px){ .week-grid { grid-template-columns: repeat(3,1fr); } }
-.day-card { background: var(–surface); border: 1px solid var(–border); border-radius: 14px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; user-select: none; }
-.day-card:hover { border-color: var(–accent); }
-.day-card.worked { background: rgba(124,92,252,0.12); border-color: var(–accent); }
-.day-card.today { border-color: var(–green); box-shadow: 0 0 12px rgba(34,211,160,0.2); }
-.day-card.past { opacity: 0.5; }
-.day-card.weekend { border-color: rgba(251,146,60,0.3); }
-.day-card.weekend.worked { background: rgba(251,146,60,0.1); border-color: var(–orange); }
-.day-name { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(–muted); margin-bottom: 6px; }
-.day-num { font-family: ‘Syne’,sans-serif; font-size: 1.1rem; font-weight: 700; }
-.day-check { position: absolute; top: 6px; right: 6px; width: 14px; height: 14px; background: var(–accent); border-radius: 50%; display: none; align-items: center; justify-content: center; }
-.day-card.worked .day-check { display: flex; }
-.day-check::after { content: ‘✓’; color: #fff; font-size: 8px; font-weight: 900; }
+.spaces {
+display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+}
 
-.shift-section { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 28px; margin-bottom: 32px; }
-.shift-list { display: flex; flex-direction: column; gap: 10px; }
-.shift-item { display: flex; align-items: center; justify-content: space-between; background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
-.shift-date { font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 0.95rem; min-width: 100px; }
-.shift-hours { color: var(–muted); font-size: 0.85rem; flex: 1; }
-.shift-earn { font-family: ‘Syne’,sans-serif; font-weight: 700; color: var(–green); font-size: 0.95rem; }
-.empty-state { text-align: center; padding: 40px; color: var(–muted); font-size: 0.9rem; }
-.empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+.space-card {
+background:var(–card); border:2px solid var(–border);
+border-radius:18px; padding:28px 24px;
+cursor:pointer; transition:all .3s;
+position:relative; overflow:hidden;
+text-align:left;
+}
 
-/* PRO LOCK */
-.pro-wrapper { position: relative; margin-bottom: 32px; border-radius: 20px; }
-.pro-blur { filter: blur(5px); pointer-events: none; user-select: none; opacity: 0.5; border-radius: 20px; overflow: hidden; }
-.pro-lock-overlay { position: absolute; inset: 0; z-index: 10; background: rgba(10,10,15,0.55); backdrop-filter: blur(1px); border-radius: 20px; border: 1px solid rgba(124,92,252,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; padding: 32px; text-align: center; }
-.pro-lock-overlay:hover { background: rgba(10,10,15,0.7); }
-.lock-icon { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg,var(–accent),var(–accent2)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 24px rgba(124,92,252,0.5); animation: lockPulse 2.5s ease-in-out infinite; }
-@keyframes lockPulse { 0%,100%{box-shadow:0 4px 20px rgba(124,92,252,0.4)} 50%{box-shadow:0 4px 40px rgba(124,92,252,0.8)} }
-.lock-title { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.05rem; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.lock-desc { font-size: 0.83rem; color: var(–muted); max-width: 260px; line-height: 1.5; }
-.lock-btn { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 12px; padding: 11px 26px; font-family: ‘Syne’,sans-serif; font-size: 0.87rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-.lock-btn:hover { transform: translateY(-2px); }
-.pro-badge { display: inline-flex; align-items: center; background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; font-size: 0.58rem; font-weight: 800; letter-spacing: 1px; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; vertical-align: middle; margin-left: 6px; }
+.space-card::before {
+content:’’; position:absolute; inset:0;
+opacity:0; transition:opacity .3s;
+}
 
-.feat-card { background: var(–surface); border: 1px solid var(–border); border-radius: 20px; padding: 28px; }
-.proj-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 20px; }
-@media(max-width:600px){ .proj-row { grid-template-columns: 1fr; } }
-.proj-item { background: var(–surface2); border: 1px solid var(–border); border-radius: 14px; padding: 18px; text-align: center; }
-.proj-val { font-family: ‘Syne’,sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
-.proj-label { font-size: 0.75rem; color: var(–muted); text-transform: uppercase; }
+.space-card.sal::before { background:radial-gradient(ellipse at top right, var(–sal-g), transparent 70%); }
+.space-card.free::before { background:radial-gradient(ellipse at top right, var(–free-g), transparent 70%); }
+.space-card.ent::before { background:radial-gradient(ellipse at top right, var(–ent-g), transparent 70%); }
 
-input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 100px; outline: none; cursor: pointer; padding: 0; margin-bottom: 0; border: none !important; background: linear-gradient(90deg,var(–accent) var(–range-pct,0%),var(–surface2) var(–range-pct,0%)) !important; color-scheme: dark; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: white; cursor: pointer; border: 3px solid var(–accent2); }
-.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.slider-val { font-family: ‘Syne’,sans-serif; font-size: 1.4rem; font-weight: 800; color: var(–accent2); }
-.sim-result { margin-top: 20px; background: var(–surface2); border: 1px solid var(–border); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.sim-item-label { font-size: 0.75rem; color: var(–muted); text-transform: uppercase; margin-bottom: 4px; }
-.sim-item-val { font-family: ‘Syne’,sans-serif; font-size: 1.3rem; font-weight: 800; }
+.space-card:hover, .space-card.active { border-width:2px; transform:translateY(-4px); }
+.space-card.sal:hover, .space-card.sal.active { border-color:var(–sal); box-shadow:0 0 30px var(–sal-glow); }
+.space-card.free:hover, .space-card.free.active { border-color:var(–free); box-shadow:0 0 30px var(–free-glow); }
+.space-card.ent:hover, .space-card.ent.active { border-color:var(–ent); box-shadow:0 0 30px var(–ent-glow); }
+.space-card:hover::before, .space-card.active::before { opacity:1; }
 
-.obj-input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
-.obj-input-row input { margin-bottom: 0; }
-.btn-set { background: var(–accent); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-family: ‘DM Sans’,sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
-.obj-progress-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(–muted); margin-bottom: 8px; }
-.obj-bar-bg { background: var(–surface2); border-radius: 100px; height: 10px; overflow: hidden; margin-bottom: 16px; }
-.obj-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(–green),#6ee7b7); transition: width 0.8s ease; }
-.obj-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.obj-info-item { background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 14px; text-align: center; }
-.obj-info-val { font-family: ‘Syne’,sans-serif; font-size: 1.2rem; font-weight: 800; color: var(–green); }
-.obj-info-label { font-size: 0.72rem; color: var(–muted); text-transform: uppercase; margin-top: 2px; }
+.space-icon { font-size:2rem; margin-bottom:12px; display:block; position:relative; z-index:1; }
+.space-name { font-size:1.15rem; font-weight:900; margin-bottom:4px; position:relative; z-index:1; letter-spacing:-0.3px; }
+.space-desc { font-size:0.82rem; color:var(–muted2); line-height:1.5; position:relative; z-index:1; margin-bottom:14px; }
+.space-tags { display:flex; flex-wrap:wrap; gap:6px; position:relative; z-index:1; }
+.stag { font-size:0.68rem; font-weight:700; padding:3px 9px; border-radius:100px; }
+.stag.sal { background:rgba(124,92,252,.15); color:#a78bfa; }
+.stag.free { background:rgba(245,158,11,.15); color:#fbbf24; }
+.stag.ent { background:rgba(14,165,233,.15); color:#38bdf8; }
 
-.earn-bar-wrap { margin-top: 20px; }
-.earn-bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.earn-bar-label { min-width: 50px; color: var(–muted); font-size: 0.75rem; }
-.earn-bar-track { flex: 1; background: var(–surface2); border-radius: 100px; height: 8px; overflow: hidden; }
-.earn-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(–accent),var(–accent2)); transition: width 0.8s ease; }
-.earn-bar-val { min-width: 64px; text-align: right; font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 0.78rem; color: var(–green); }
+.space-arrow {
+position:absolute; top:24px; right:24px;
+width:28px; height:28px; border-radius:50%;
+display:flex; align-items:center; justify-content:center;
+font-size:0.85rem; z-index:1; transition:all .2s;
+opacity:0;
+}
+.space-card:hover .space-arrow, .space-card.active .space-arrow { opacity:1; }
+.sal .space-arrow { background:var(–sal); }
+.free .space-arrow { background:var(–free); }
+.ent .space-arrow { background:var(–ent); }
 
-.month-nav { display: flex; align-items: center; gap: 12px; background: var(–surface2); border: 1px solid var(–border); border-radius: 12px; padding: 8px 16px; font-family: ‘Syne’,sans-serif; font-weight: 700; font-size: 0.9rem; width: fit-content; margin-top: 4px; }
-.month-nav button { background: none; border: none; color: var(–muted); cursor: pointer; font-size: 1rem; padding: 2px 8px; border-radius: 6px; transition: all 0.15s; }
-.month-nav button:hover { color: var(–text); background: var(–border); }
+/* INTERFACE PREVIEW */
+.interface-preview {
+max-width:960px; margin:0 auto; padding:0 24px 80px;
+position:relative; z-index:1;
+}
 
-.promo-banner { background: linear-gradient(135deg,rgba(124,92,252,0.15),rgba(192,132,252,0.08)); border: 1px solid rgba(124,92,252,0.3); border-radius: 20px; padding: 28px 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-.promo-text h3 { font-family: ‘Syne’,sans-serif; font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.promo-text p { color: var(–muted); font-size: 0.85rem; max-width: 400px; line-height: 1.5; }
-.promo-feats { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
-.promo-feat { font-size: 0.8rem; color: var(–muted); }
-.promo-feat::before { content: ’✦ ’; color: var(–accent); }
-.btn-upgrade { background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; border: none; border-radius: 14px; padding: 14px 28px; font-family: ‘Syne’,sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 4px 20px rgba(124,92,252,0.4); }
-.btn-upgrade:hover { transform: translateY(-2px); }
+.iface { display:none; animation:up .45s ease both; }
+.iface.visible { display:block; }
 
-/* MODAL */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(–surface); border: 1px solid var(–border); border-radius: 24px; padding: 40px; max-width: 500px; width: 100%; position: relative; animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; max-height: 90vh; overflow-y: auto; }
-@keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
-.modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(–muted); font-size: 1.4rem; cursor: pointer; line-height: 1; }
-.modal h2 { font-family: ‘Syne’,sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg,#fff,var(–accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.modal > p { color: var(–muted); font-size: 0.9rem; margin-bottom: 28px; line-height: 1.6; }
-.price-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
-.price-card { background: var(–surface2); border: 1px solid var(–border); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; text-align: center; }
-.price-card:hover, .price-card.selected { border-color: var(–accent); background: rgba(124,92,252,0.1); }
-.price-card.popular { border-color: var(–accent); position: relative; }
-.price-card.popular::before { content: ‘Populaire’; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,var(–accent),var(–accent2)); color: #fff; font-size: 0.62rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; white-space: nowrap; }
-.price-amount { font-family: ‘Syne’,sans-serif; font-size: 1.8rem; font-weight: 800; }
-.price-amount span { font-size: 0.8rem; color: var(–muted); font-weight: 400; }
-.price-label { font-size: 0.75rem; color: var(–muted); margin-top: 4px; }
-.modal-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
-.modal-feat { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(–muted); }
-.modal-feat .icon { color: var(–green); }
+.iface-frame {
+background:var(–card); border:1px solid var(–border2);
+border-radius:20px; overflow:hidden;
+box-shadow:0 40px 80px rgba(0,0,0,.5), 0 0 60px rgba(0,0,0,.3);
+}
 
-/* AUTH MODAL */
-.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(–surface2); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
-.auth-tab { padding: 10px; text-align: center; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(–muted); transition: all 0.2s; border: none; background: none; font-family: ‘DM Sans’,sans-serif; }
-.auth-tab.active { background: var(–accent); color: #fff; }
-.auth-input { width: 100%; background: var(–surface2) !important; border: 1px solid var(–border); border-radius: 12px; color: var(–text) !important; font-family: ‘DM Sans’,sans-serif; font-size: 0.95rem; padding: 13px 16px; outline: none; transition: border-color 0.2s; margin-bottom: 14px; color-scheme: dark; }
-.auth-input:focus { border-color: var(–accent); }
-.auth-error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(–red); display: none; margin-bottom: 14px; }
-.auth-success { background: rgba(34,211,160,0.1); border: 1px solid rgba(34,211,160,0.3); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(–green); display: none; margin-bottom: 14px; }
+.iface-topbar {
+display:flex; align-items:center; gap:8px;
+padding:12px 18px; border-bottom:1px solid var(–border);
+}
+.iface-topbar.sal { background:linear-gradient(90deg, rgba(124,92,252,.08), var(–surface)); }
+.iface-topbar.free { background:linear-gradient(90deg, rgba(245,158,11,.08), var(–surface)); }
+.iface-topbar.ent { background:linear-gradient(90deg, rgba(14,165,233,.08), var(–surface)); }
 
-.divider { border: none; border-top: 1px solid var(–border); margin: 8px 0 20px; }
-.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(–surface); border: 1px solid var(–border); border-radius: 14px; padding: 14px 24px; font-size: 0.9rem; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none; white-space: nowrap; color: var(–text); }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-@keyframes fadeUp { from{transform:translateY(24px);opacity:0} to{transform:translateY(0);opacity:1} }
+.tdots { display:flex; gap:5px; }
+.td { width:10px; height:10px; border-radius:50%; }
+.td.r{background:#ff5f57} .td.y{background:#ffbd2e} .td.g{background:#28ca40}
+.turl { flex:1; background:var(–card2); border:1px solid var(–border); border-radius:5px; padding:5px 12px; font-family:‘JetBrains Mono’,monospace; font-size:.7rem; color:var(–muted2); margin:0 10px; }
+.tbadge { font-size:.68rem; font-weight:700; padding:3px 10px; border-radius:100px; }
+.tbadge.sal { background:rgba(124,92,252,.2); color:#a78bfa; }
+.tbadge.free { background:rgba(245,158,11,.2); color:#fbbf24; }
+.tbadge.ent { background:rgba(14,165,233,.2); color:#38bdf8; }
+
+.iface-body { display:grid; grid-template-columns:180px 1fr; min-height:400px; }
+
+.mini-sidebar {
+background:var(–surface); border-right:1px solid var(–border);
+padding:18px 12px; display:flex; flex-direction:column; gap:4px;
+}
+.ms-logo { font-size:.9rem; font-weight:900; padding:0 6px; margin-bottom:18px; }
+.ms-logo.sal { color:#a78bfa; }
+.ms-logo.free { color:#fbbf24; }
+.ms-logo.ent { color:#38bdf8; }
+.ms-nav { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; font-size:.75rem; color:var(–muted2); font-weight:600; cursor:default; }
+.ms-nav.a { color:var(–text); }
+.ms-nav.a.sal { background:rgba(124,92,252,.15); }
+.ms-nav.a.free { background:rgba(245,158,11,.15); }
+.ms-nav.a.ent { background:rgba(14,165,233,.15); }
+.ms-sect { font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(–muted); padding:10px 10px 4px; }
+
+.mini-content { padding:18px; display:flex; flex-direction:column; gap:14px; overflow:hidden; }
+
+/* Mini stat cards */
+.m-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.m-stat { background:var(–surface); border:1px solid var(–border); border-radius:10px; padding:14px; }
+.m-stat-label { font-size:.62rem; color:var(–muted2); font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
+.m-stat-val { font-family:‘JetBrains Mono’,monospace; font-size:1.15rem; font-weight:700; }
+
+/* Mini row */
+.m-row { background:var(–surface); border:1px solid var(–border); border-radius:10px; padding:14px; display:flex; gap:12px; }
+.m-row-left { flex:1; }
+.m-row-title { font-size:.72rem; color:var(–muted2); font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px; }
+.m-bars { display:flex; align-items:flex-end; gap:5px; height:55px; }
+.m-bar { flex:1; border-radius:4px 4px 0 0; }
+.m-bar.sal { background:linear-gradient(180deg,var(–sal),rgba(124,92,252,.3)); }
+.m-bar.free { background:linear-gradient(180deg,var(–free),rgba(245,158,11,.3)); }
+.m-bar.ent { background:linear-gradient(180deg,var(–ent),rgba(14,165,233,.3)); }
+
+.m-result { flex:1; background:var(–card2); border:1px solid var(–border); border-radius:9px; padding:12px; display:flex; flex-direction:column; justify-content:center; gap:6px; }
+.m-result-row { display:flex; justify-content:space-between; align-items:center; font-size:.72rem; }
+.m-result-label { color:var(–muted2); }
+.m-result-val { font-family:‘JetBrains Mono’,monospace; font-weight:700; font-size:.82rem; }
+.m-result-main { background:rgba(0,229,160,.08); border:1px solid rgba(0,229,160,.2); border-radius:7px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+.m-result-main-label { font-size:.68rem; color:var(–emerald); font-weight:700; }
+.m-result-main-val { font-family:‘JetBrains Mono’,monospace; font-size:1rem; font-weight:700; color:var(–emerald); }
+
+/* SWITCH MODE BAR */
+.switch-bar {
+max-width:960px; margin:0 auto 32px;
+padding:0 24px;
+display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.switch-label { font-size:.78rem; color:var(–muted2); font-weight:600; }
+.switch-btns { display:flex; gap:4px; background:var(–card); border:1px solid var(–border); border-radius:10px; padding:4px; }
+.sw-btn { padding:7px 16px; border-radius:7px; font-size:.78rem; font-weight:700; cursor:pointer; border:none; background:transparent; color:var(–muted2); font-family:‘Cabinet Grotesk’,sans-serif; transition:all .2s; }
+.sw-btn.on-sal { background:var(–sal); color:#fff; }
+.sw-btn.on-free { background:var(–free); color:#000; }
+.sw-btn.on-ent { background:var(–ent); color:#fff; }
+
+/* STATS BAND */
+.stats-band { position:relative; z-index:1; background:var(–surface); border-top:1px solid var(–border); border-bottom:1px solid var(–border); padding:36px 24px; }
+.stats-inner { max-width:900px; margin:0 auto; display:flex; justify-content:center; gap:56px; flex-wrap:wrap; }
+.band-stat { text-align:center; }
+.band-num { font-family:‘JetBrains Mono’,monospace; font-size:2rem; font-weight:700; background:linear-gradient(135deg,var(–sal),var(–ent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
+.band-label { color:var(–muted2); font-size:.75rem; margin-top:5px; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+
+/* SECTION */
+.section { position:relative; z-index:1; max-width:1060px; margin:0 auto; padding:80px 24px; }
+.section-tag { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(–sal); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.section-tag::before { content:’’; width:18px; height:2px; background:currentColor; border-radius:1px; }
+.section-tag.free { color:var(–free); }
+.section-tag.ent { color:var(–ent); }
+.section-h { font-size:clamp(1.8rem,4vw,2.8rem); font-weight:900; letter-spacing:-1px; margin-bottom:12px; line-height:1.1; }
+.section-sub { color:var(–muted2); font-size:.95rem; line-height:1.65; max-width:500px; margin-bottom:48px; }
+
+/* FEATURE TABS */
+.feat-tabs { display:flex; gap:6px; margin-bottom:32px; flex-wrap:wrap; }
+.ftab { padding:8px 18px; border-radius:9px; font-size:.82rem; font-weight:700; cursor:pointer; border:1px solid var(–border); background:transparent; color:var(–muted2); font-family:‘Cabinet Grotesk’,sans-serif; transition:all .2s; }
+.ftab.on-sal { background:rgba(124,92,252,.15); color:#a78bfa; border-color:rgba(124,92,252,.3); }
+.ftab.on-free { background:rgba(245,158,11,.15); color:#fbbf24; border-color:rgba(245,158,11,.3); }
+.ftab.on-ent { background:rgba(14,165,233,.15); color:#38bdf8; border-color:rgba(14,165,233,.3); }
+
+/* FEAT GRIDS */
+.feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.feat-panel { display:none; }
+.feat-panel.visible { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; animation:up .4s ease both; }
+
+.fc { background:var(–card); border:1px solid var(–border); border-radius:var(–r); padding:24px; transition:all .25s; position:relative; overflow:hidden; }
+.fc::before { content:’’; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .25s; }
+.fc.sal::before { background:linear-gradient(90deg,var(–sal),#a78bfa); }
+.fc.free::before { background:linear-gradient(90deg,var(–free),#fcd34d); }
+.fc.ent::before { background:linear-gradient(90deg,var(–ent),#7dd3fc); }
+.fc:hover { transform:translateY(-3px); border-color:var(–border2); }
+.fc:hover::before { opacity:1; }
+.fc-icon { font-size:1.4rem; margin-bottom:12px; }
+.fc h3 { font-size:.95rem; font-weight:800; margin-bottom:6px; }
+.fc p { color:var(–muted2); font-size:.82rem; line-height:1.55; }
+.fc-pro { position:absolute; top:14px; right:14px; font-size:.6rem; font-weight:800; padding:2px 7px; border-radius:5px; text-transform:uppercase; letter-spacing:.8px; }
+.fc-pro.sal { background:rgba(124,92,252,.2); color:#a78bfa; }
+.fc-pro.free { background:rgba(245,158,11,.2); color:#fbbf24; }
+.fc-pro.ent { background:rgba(14,165,233,.2); color:#38bdf8; }
+
+/* PRICING */
+.pricing-section { position:relative; z-index:1; max-width:1060px; margin:0 auto; padding:0 24px 96px; }
+.pricing-head { text-align:center; margin-bottom:40px; }
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+
+.pc { background:var(–card); border:1px solid var(–border); border-radius:var(–r); padding:30px; position:relative; transition:all .25s; }
+.pc:hover { transform:translateY(-3px); }
+.pc.sal:hover { border-color:rgba(124,92,252,.4); box-shadow:0 0 30px var(–sal-glow); }
+.pc.free:hover { border-color:rgba(245,158,11,.35); box-shadow:0 0 30px var(–free-glow); }
+.pc.ent { border-color:rgba(14,165,233,.3); background:linear-gradient(160deg,rgba(14,165,233,.07) 0%,var(–card) 60%); }
+.pc.ent:hover { border-color:rgba(14,165,233,.5); box-shadow:0 0 40px var(–ent-glow); }
+
+.pc-top-tag { position:absolute; top:-1px; right:22px; font-size:.65rem; font-weight:800; padding:4px 12px; border-radius:0 0 9px 9px; text-transform:uppercase; letter-spacing:1px; color:#fff; }
+.pc-top-tag.ent { background:linear-gradient(135deg,var(–ent),#7dd3fc); }
+
+.pc-for { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; }
+.pc-for.sal { color:#a78bfa; }
+.pc-for.free { color:#fbbf24; }
+.pc-for.ent { color:#38bdf8; }
+.pc-name { font-size:1.05rem; font-weight:900; margin-bottom:14px; }
+.pc-price { font-family:‘JetBrains Mono’,monospace; font-size:2.6rem; font-weight:700; letter-spacing:-1px; line-height:1; margin-bottom:3px; }
+.pc-price.sal { color:var(–sal); }
+.pc-price.free { color:var(–free); }
+.pc-price.ent { color:var(–ent); }
+.pc-period { color:var(–muted2); font-size:.78rem; margin-bottom:22px; }
+.pc-features { list-style:none; margin-bottom:26px; display:flex; flex-direction:column; gap:8px; }
+.pc-features li { display:flex; align-items:flex-start; gap:9px; font-size:.83rem; color:var(–muted2); }
+.pc-features li .ck { font-size:.75rem; font-weight:700; margin-top:1px; }
+.pc-features li.pro-feat { color:var(–text); }
+.pc-features li.locked { color:var(–muted); }
+.btn-plan { width:100%; padding:13px; border-radius:10px; font-weight:800; font-size:.9rem; cursor:pointer; font-family:‘Cabinet Grotesk’,sans-serif; transition:all .2s; border:none; }
+.btn-plan.outline { background:transparent; border:1px solid var(–border2); color:var(–text); }
+.btn-plan.outline:hover { border-color:var(–border2); background:rgba(255,255,255,.04); }
+.btn-plan.sal { background:linear-gradient(135deg,var(–sal),#a78bfa); color:#fff; box-shadow:0 4px 20px var(–sal-glow); }
+.btn-plan.sal:hover { opacity:.88; transform:translateY(-1px); }
+.btn-plan.free { background:linear-gradient(135deg,var(–free),#fcd34d); color:#000; box-shadow:0 4px 20px var(–free-glow); }
+.btn-plan.free:hover { opacity:.88; transform:translateY(-1px); }
+.btn-plan.ent { background:linear-gradient(135deg,var(–ent),#7dd3fc); color:#fff; box-shadow:0 4px 20px var(–ent-glow); }
+.btn-plan.ent:hover { opacity:.88; transform:translateY(-1px); }
+
+.pc-divider { height:1px; background:var(–border); margin:16px 0; }
+.pc-incl { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(–muted); margin-bottom:8px; }
+
+/* Toggle annuel */
+
+/* FAQ */
+.faq-section { position:relative; z-index:1; max-width:700px; margin:0 auto; padding:0 24px 96px; }
+.faq-item { border-bottom:1px solid var(–border); padding:18px 0; cursor:pointer; }
+.faq-q { font-weight:700; font-size:.95rem; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.faq-q::after { content:’+’; color:var(–sal); font-size:1.3rem; flex-shrink:0; }
+.faq-a { color:var(–muted2); font-size:.875rem; line-height:1.7; margin-top:10px; display:none; }
+.faq-item.open .faq-a { display:block; }
+.faq-item.open .faq-q::after { content:‘−’; }
+
+/* FOOTER */
+footer { position:relative; z-index:1; border-top:1px solid var(–border); padding:36px 48px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+.footer-logo { font-size:1.1rem; font-weight:900; color:var(–muted2); }
+.footer-links { display:flex; gap:24px; flex-wrap:wrap; }
+.footer-links a { color:var(–muted); font-size:.8rem; text-decoration:none; transition:color .2s; }
+.footer-links a:hover { color:var(–text); }
+.footer-copy { color:var(–muted); font-size:.75rem; }
+
+@keyframes up { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:860px){
+.burger { display:flex !important; }
+#mobileMenu { display:flex !important; }
+#mobileMenu:not(.open) { display:none !important; }
+
+.spaces{grid-template-columns:1fr}
+.feat-panel.visible,.pricing-grid{grid-template-columns:1fr}
+.m-stats{grid-template-columns:1fr 1fr}
+.iface-body{grid-template-columns:1fr}
+.mini-sidebar{display:none}
+nav{padding:0 20px}
+.nav-links{display:none}
+footer{padding:28px 20px}
+}
+@media(max-width:560px){
+.m-stats{grid-template-columns:1fr}
+.m-row{flex-direction:column}
+.stats-inner{gap:28px}
+}
 </style>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=Ae2q3LX6ogLzcK33ZAOqWjFAspwXWApfSuPFZ7oBwFicAmrYa4PLEq_DUDwSa8vJ1Xp_kdlktTVn9RVg&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 
 </head>
 <body>
+<div class="mesh"></div>
 
-<!-- OPTIONAL ACCOUNT BANNER (shown when not logged in) -->
+<!-- NAV -->
 
-<div class="account-banner" id="accountBanner">
-  <p>💾 <span>Sauvegarde tes données dans le cloud</span> — connecte-toi pour ne jamais rien perdre</p>
-  <div class="banner-btns">
-    <button class="btn-banner-login" onclick="openAuthModal('login')">Connexion</button>
-    <button class="btn-banner-signup" onclick="openAuthModal('signup')">Créer un compte</button>
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-mark">⚡</div>
+    Planify
+  </a>
+  <ul class="nav-links">
+    <li><a href="#espaces">Espaces</a></li>
+    <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+    <li><a href="#tarifs">Tarifs</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-ghost">Connexion</button>
+    <button class="btn-cta">Essai gratuit →</button>
+  </div>
+  <button class="burger" id="burgerBtn" onclick="document.getElementById('mobileMenu').classList.toggle('open')" style="display:none;background:transparent;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);cursor:pointer;font-size:1.1rem;">☰</button>
+</nav>
+<div id="mobileMenu" style="display:none;flex-direction:column;gap:0;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:66px;z-index:99;">
+  <a href="#espaces" style="padding:14px 24px;color:var(--muted2);text-decoration:none;font-weight:600;border-bottom:1px solid var(--border);" onclick="document.getElementById('mobileMenu').classList.remove('open')">Espaces</a>
+  <a href="#fonctionnalites" style="padding:14px 24px;color:var(--muted2);text-decoration:none;font-weight:600;border-bottom:1px solid var(--border);" onclick="document.getElementById('mobileMenu').classList.remove('open')">Fonctionnalités</a>
+  <a href="#tarifs" style="padding:14px 24px;color:var(--muted2);text-decoration:none;font-weight:600;border-bottom:1px solid var(--border);" onclick="document.getElementById('mobileMenu').classList.remove('open')">Tarifs</a>
+  <a href="#faq" style="padding:14px 24px;color:var(--muted2);text-decoration:none;font-weight:600;" onclick="document.getElementById('mobileMenu').classList.remove('open')">FAQ</a>
+</div>
+
+<!-- HERO -->
+
+<section class="hero">
+  <div class="eyebrow"><div class="pulse"></div>Votre espace, votre façon</div>
+  <h1>Gérez vos revenus<br><em>à votre manière</em></h1>
+  <p class="hero-desc">Salarié, freelance ou entreprise — Planify s'adapte à votre réalité. Trois espaces distincts, une seule application.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:up .6s .24s ease both;">
+    <button class="btn-cta" style="padding:14px 32px;font-size:1rem;border-radius:11px;">Commencer gratuitement →</button>
+    <button class="btn-ghost" style="padding:14px 32px;font-size:1rem;border-radius:11px;">Voir la démo</button>
+  </div>
+</section>
+
+<!-- SPACE SELECTOR -->
+
+<div class="space-selector" id="espaces">
+  <div class="selector-label">Choisissez votre espace</div>
+  <div class="spaces">
+    <div class="space-card sal active" onclick="selectSpace('sal')">
+      <div class="space-arrow">→</div>
+      <span class="space-icon">👔</span>
+      <div class="space-name">Espace Salarié</div>
+      <div class="space-desc">Suivi de salaire, calcul net/brut, planning de travail et objectifs financiers.</div>
+      <div class="space-tags">
+        <span class="stag sal">CDI / CDD</span>
+        <span class="stag sal">Intérim</span>
+        <span class="stag sal">Multi-emplois</span>
+      </div>
+    </div>
+    <div class="space-card free" onclick="selectSpace('free')">
+      <div class="space-arrow">→</div>
+      <span class="space-icon">💻</span>
+      <div class="space-name">Espace Freelance</div>
+      <div class="space-desc">Suivi de missions, facturation, cotisations auto-entrepreneur et trésorerie.</div>
+      <div class="space-tags">
+        <span class="stag free">Auto-entrepreneur</span>
+        <span class="stag free">Freelance</span>
+        <span class="stag free">TNS</span>
+      </div>
+    </div>
+    <div class="space-card ent" onclick="selectSpace('ent')">
+      <div class="space-arrow">→</div>
+      <span class="space-icon">🏢</span>
+      <div class="space-name">Espace Entreprise</div>
+      <div class="space-desc">Gestion des salariés, bulletins de paie, congés, notes de frais et reporting RH.</div>
+      <div class="space-tags">
+        <span class="stag ent">TPE / PME</span>
+        <span class="stag ent">Multi-sites</span>
+        <span class="stag ent">RH</span>
+      </div>
+    </div>
   </div>
 </div>
 
-<header>
-  <div class="logo">Plani<span>fy</span></div>
-  <div class="header-right">
-    <div id="savingIndicator" style="display:none;align-items:center;gap:6px;font-size:0.75rem;color:var(--muted);">
-      <div class="saving-dot"></div> Sauvegarde...
-    </div>
-    <div class="user-chip hidden" id="userChip">
-      <div class="user-avatar" id="userAvatar">?</div>
-      <span id="userEmailDisplay" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.75rem;"></span>
-    </div>
-    <div class="plan-chip free" id="planChip">Gratuit</div>
-    <button class="btn-upgrade-header" id="headerUpgradeBtn" onclick="openModal()">✦ Pro</button>
-    <button class="btn-logout hidden" id="logoutBtn" onclick="logout()">Déco.</button>
-  </div>
-</header>
+<!-- SWITCH BAR -->
 
-<main>
-  <div class="hero">
-    <h1>Ton mois,<br>sous contrôle.</h1>
-    <p>Planifie, suis tes gains et atteins tes objectifs.</p>
+<div class="switch-bar">
+  <span class="switch-label">Changer d'espace à tout moment :</span>
+  <div class="switch-btns">
+    <button class="sw-btn on-sal" id="sw-sal" onclick="selectSpace('sal')">👔 Salarié</button>
+    <button class="sw-btn" id="sw-free" onclick="selectSpace('free')">💻 Freelance</button>
+    <button class="sw-btn" id="sw-ent" onclick="selectSpace('ent')">🏢 Entreprise</button>
   </div>
+</div>
 
-  <div class="setup-grid">
-    <div class="card">
-      <div class="card-label"><span class="dot"></span>Mon salaire</div>
-      <h2>💶 Configuration</h2>
-      <label>Salaire mensuel net (€)</label>
-      <input type="number" id="salaire" placeholder="ex: 2200" min="0">
-      <label>Jours travaillés par mois</label>
-      <input type="number" id="joursParMois" placeholder="ex: 22" min="1" max="31">
-      <label>Mode de calcul</label>
-      <select id="modeCalc">
-        <option value="jours">Par jours travaillés</option>
-        <option value="heures">Par heures travaillées</option>
-      </select>
-      <button class="btn btn-primary" onclick="saveConfig()">💾 Enregistrer</button>
-    </div>
-    <div class="card">
-      <div class="card-label"><span class="dot"></span>Mes horaires</div>
-      <h2>⏱ Paramètres</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label>Début</label><input type="time" id="heureDebut" value="09:00"></div>
-        <div><label>Fin</label><input type="time" id="heureFin" value="17:00"></div>
+<!-- INTERFACE PREVIEW -->
+
+<div class="interface-preview">
+
+  <!-- SALARIÉ -->
+
+  <div class="iface visible" id="iface-sal">
+    <div class="iface-frame">
+      <div class="iface-topbar sal">
+        <div class="tdots"><div class="td r"></div><div class="td y"></div><div class="td g"></div></div>
+        <div class="turl">app.planify.fr/salarie/dashboard</div>
+        <div class="tbadge sal">👔 Espace Salarié</div>
       </div>
-      <label>Pause (minutes)</label>
-      <input type="number" id="pause" value="60" min="0" max="180">
-      <label>Mois affiché</label>
-      <div class="month-nav">
-        <button onclick="changeMonth(-1)">‹</button>
-        <span id="monthDisplay">—</span>
-        <button onclick="changeMonth(1)">›</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card" style="--stat-color:var(--green)"><span class="stat-icon">💰</span><div class="stat-value" id="statGagne">0 €</div><div class="stat-label">Déjà gagné</div></div>
-    <div class="stat-card" style="--stat-color:var(--accent2)"><span class="stat-icon">📆</span><div class="stat-value" id="statRestantJours">—</div><div class="stat-label">Jours restants</div></div>
-    <div class="stat-card" style="--stat-color:var(--orange)"><span class="stat-icon">⚡</span><div class="stat-value" id="statRestantSalaire">0 €</div><div class="stat-label">Salaire restant</div></div>
-    <div class="stat-card" style="--stat-color:var(--accent)"><span class="stat-icon">🕐</span><div class="stat-value" id="statHeures">0 h</div><div class="stat-label">Heures effectuées</div></div>
-  </div>
-
-  <div class="progress-section">
-    <div class="progress-header"><div class="progress-title">Progression du mois</div><div class="progress-pct" id="pctDisplay">0%</div></div>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
-    <div class="progress-meta"><span id="progressLeft">Configure ton salaire pour commencer</span><span id="progressRight"></span></div>
-  </div>
-
-  <div class="card" style="margin-bottom:32px;">
-    <div class="section-header">
-      <div class="section-title">📅 Planning du mois</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="resetMonth()">🗑 Reset</button>
-        <button class="btn btn-ghost btn-sm" onclick="cocheToutJourOuvrable()">✅ Ouvrables</button>
-      </div>
-    </div>
-    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:20px;">Clique sur un jour pour le marquer travaillé. <span style="color:var(--orange)">■</span> Weekend &nbsp;<span style="color:var(--green)">■</span> Aujourd'hui</p>
-    <div class="week-grid" id="calendarGrid"></div>
-  </div>
-
-  <div class="shift-section">
-    <div class="section-header"><div class="section-title">🗒 Journées travaillées</div><span style="font-size:0.82rem;color:var(--muted)" id="shiftCount">0 jour(s)</span></div>
-    <div class="shift-list" id="shiftList"><div class="empty-state"><span class="emoji">👆</span>Clique sur un jour dans le calendrier</div></div>
-    <div id="weekChart"></div>
-  </div>
-
-  <!-- PRO: PROJECTION -->
-
-  <div class="pro-wrapper" id="projWrapper">
-    <div class="pro-blur" id="projBlur">
-      <div class="feat-card">
-        <div class="section-header"><div class="section-title">🔮 Projection fin de mois <span class="pro-badge">✦ Pro</span></div></div>
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;">Si tu continues à ce rythme...</p>
-        <div class="proj-row">
-          <div class="proj-item"><div class="proj-val" style="color:var(--green)" id="projTotal">—</div><div class="proj-label">Salaire projeté</div></div>
-          <div class="proj-item"><div class="proj-val" style="color:var(--accent2)" id="projJoursManquants">—</div><div class="proj-label">Jours encore à faire</div></div>
-          <div class="proj-item"><div class="proj-val" style="color:var(--orange)" id="projRythme">—</div><div class="proj-label">Gain / jour</div></div>
+      <div class="iface-body">
+        <div class="mini-sidebar">
+          <div class="ms-logo sal">⚡ Planify</div>
+          <div class="ms-nav a sal">▦ &nbsp;Dashboard</div>
+          <div class="ms-nav">💶 &nbsp;Mes salaires</div>
+          <div class="ms-nav">📅 &nbsp;Mon planning</div>
+          <div class="ms-nav">🧮 &nbsp;Calculateur</div>
+          <div class="ms-nav">🎯 &nbsp;Objectifs</div>
+          <div class="ms-sect">Pro</div>
+          <div class="ms-nav">📄 &nbsp;Export PDF</div>
+          <div class="ms-nav">📊 &nbsp;Statistiques</div>
+          <div class="ms-nav">🔔 &nbsp;Alertes</div>
         </div>
-      </div>
-    </div>
-    <div class="pro-lock-overlay" onclick="openModal()"><div class="lock-icon">🔮</div><div class="lock-title">Projection intelligente</div><div class="lock-desc">Vois exactement combien tu gagneras en fin de mois selon ton rythme.</div><button class="lock-btn">Débloquer avec Pro →</button></div>
-  </div>
-
-  <!-- PRO: SIMULATEUR -->
-
-  <div class="pro-wrapper" id="simWrapper">
-    <div class="pro-blur" id="simBlur">
-      <div class="feat-card">
-        <div class="section-header"><div class="section-title">⚡ Simulateur heures sup <span class="pro-badge">✦ Pro</span></div></div>
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Glisse le curseur pour voir ce que tu gagnes si tu travailles plus.</p>
-        <div class="slider-header"><label style="margin:0;">Jours supplémentaires</label><div class="slider-val" id="simSliderVal">+0 j</div></div>
-        <div style="margin:12px 0 4px;"><input type="range" id="simSlider" min="0" max="15" value="0" oninput="updateSim(this.value)"></div>
-        <div class="sim-result">
-          <div><div class="sim-item-label">Gain supplémentaire</div><div class="sim-item-val" id="simGainExtra" style="color:var(--green)">+0 €</div></div>
-          <div><div class="sim-item-label">Total du mois</div><div class="sim-item-val" id="simTotal" style="color:var(--accent2)">0 €</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="pro-lock-overlay" onclick="openModal()"><div class="lock-icon">⚡</div><div class="lock-title">Simulateur heures sup</div><div class="lock-desc">Glisse un curseur pour voir combien tu gagnes si tu travailles plus.</div><button class="lock-btn">Débloquer avec Pro →</button></div>
-  </div>
-
-  <!-- PRO: OBJECTIF -->
-
-  <div class="pro-wrapper" id="objWrapper">
-    <div class="pro-blur" id="objBlur">
-      <div class="feat-card">
-        <div class="section-header"><div class="section-title">🎯 Objectif d'épargne <span class="pro-badge">✦ Pro</span></div></div>
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;">Fixe un montant cible et suis ta progression.</p>
-        <div class="obj-input-row">
-          <div><label>Mon objectif (€)</label><input type="number" id="objInput" placeholder="ex: 500" min="0" style="margin-bottom:0;"></div>
-          <button class="btn-set" onclick="setObjectif()">Définir</button>
-        </div>
-        <div id="objProgressWrap" style="display:none;">
-          <div class="obj-progress-label"><span id="objProgressLabel">0 € / 0 €</span><span id="objProgressPct" style="color:var(--green);font-weight:700;">0%</span></div>
-          <div class="obj-bar-bg"><div class="obj-bar-fill" id="objBarFill" style="width:0%"></div></div>
-          <div class="obj-info">
-            <div class="obj-info-item"><div class="obj-info-val" id="objJoursNecessaires">—</div><div class="obj-info-label">Jours nécessaires</div></div>
-            <div class="obj-info-item"><div class="obj-info-val" id="objJoursRestants" style="color:var(--accent2)">—</div><div class="obj-info-label">Jours restants</div></div>
+        <div class="mini-content">
+          <div class="m-stats">
+            <div class="m-stat"><div class="m-stat-label">Net ce mois</div><div class="m-stat-val" style="color:var(--sal)">1 847€</div></div>
+            <div class="m-stat"><div class="m-stat-label">Heures</div><div class="m-stat-val" style="color:#38bdf8">142h</div></div>
+            <div class="m-stat"><div class="m-stat-label">Taux net/h</div><div class="m-stat-val" style="color:var(--emerald)">13,01€</div></div>
+          </div>
+          <div class="m-row">
+            <div class="m-row-left">
+              <div class="m-row-title">Revenus — 6 mois</div>
+              <div class="m-bars">
+                <div class="m-bar sal" style="height:50%"></div>
+                <div class="m-bar sal" style="height:68%"></div>
+                <div class="m-bar sal" style="height:55%"></div>
+                <div class="m-bar sal" style="height:80%"></div>
+                <div class="m-bar sal" style="height:72%"></div>
+                <div class="m-bar sal" style="height:92%"></div>
+              </div>
+            </div>
+            <div class="m-result">
+              <div class="m-row-title">Calcul net/brut</div>
+              <div class="m-result-row"><span class="m-result-label">Brut</span><span class="m-result-val">2 380€</span></div>
+              <div class="m-result-row"><span class="m-result-label">Cotisations</span><span class="m-result-val" style="color:var(--rose)">−533€</span></div>
+              <div class="m-result-main">
+                <span class="m-result-main-label">Net mensuel</span>
+                <span class="m-result-main-val">1 847€</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="pro-lock-overlay" onclick="openModal()"><div class="lock-icon">🎯</div><div class="lock-title">Objectif d'épargne</div><div class="lock-desc">Fixe un montant à atteindre ce mois-ci et suis ta progression.</div><button class="lock-btn">Débloquer avec Pro →</button></div>
   </div>
 
-  <div class="promo-banner" id="promoBanner">
-    <div class="promo-text">
-      <h3>✦ Planify Pro — Débloque tout</h3>
-      <p>Projection, simulateur, objectifs d'épargne et bien plus.</p>
-      <div class="promo-feats">
-        <div class="promo-feat">Projection fin de mois</div>
-        <div class="promo-feat">Simulateur heures sup</div>
-        <div class="promo-feat">Objectifs épargne</div>
+  <!-- FREELANCE -->
+
+  <div class="iface" id="iface-free">
+    <div class="iface-frame">
+      <div class="iface-topbar free">
+        <div class="tdots"><div class="td r"></div><div class="td y"></div><div class="td g"></div></div>
+        <div class="turl">app.planify.fr/freelance/dashboard</div>
+        <div class="tbadge free">💻 Espace Freelance</div>
+      </div>
+      <div class="iface-body">
+        <div class="mini-sidebar">
+          <div class="ms-logo free">⚡ Planify</div>
+          <div class="ms-nav a free">▦ &nbsp;Dashboard</div>
+          <div class="ms-nav">🧾 &nbsp;Mes missions</div>
+          <div class="ms-nav">🏪 &nbsp;Cotisations AE</div>
+          <div class="ms-nav">💳 &nbsp;Trésorerie</div>
+          <div class="ms-nav">🧮 &nbsp;Simulateur</div>
+          <div class="ms-sect">Pro</div>
+          <div class="ms-nav">📋 &nbsp;Devis & Factures</div>
+          <div class="ms-nav">📊 &nbsp;CA & TVA</div>
+          <div class="ms-nav">📄 &nbsp;Export comptable</div>
+        </div>
+        <div class="mini-content">
+          <div class="m-stats">
+            <div class="m-stat"><div class="m-stat-label">CA ce mois</div><div class="m-stat-val" style="color:var(--free)">4 200€</div></div>
+            <div class="m-stat"><div class="m-stat-label">Net estimé</div><div class="m-stat-val" style="color:var(--emerald)">3 276€</div></div>
+            <div class="m-stat"><div class="m-stat-label">Cotisations</div><div class="m-stat-val" style="color:var(--rose)">924€</div></div>
+          </div>
+          <div class="m-row">
+            <div class="m-row-left">
+              <div class="m-row-title">CA mensuel — 6 mois</div>
+              <div class="m-bars">
+                <div class="m-bar free" style="height:45%"></div>
+                <div class="m-bar free" style="height:60%"></div>
+                <div class="m-bar free" style="height:75%"></div>
+                <div class="m-bar free" style="height:55%"></div>
+                <div class="m-bar free" style="height:85%"></div>
+                <div class="m-bar free" style="height:100%"></div>
+              </div>
+            </div>
+            <div class="m-result">
+              <div class="m-row-title">Seuil AE 2026</div>
+              <div class="m-result-row"><span class="m-result-label">CA réalisé</span><span class="m-result-val">28 400€</span></div>
+              <div class="m-result-row"><span class="m-result-label">Plafond</span><span class="m-result-val">77 700€</span></div>
+              <div class="m-result-main">
+                <span class="m-result-main-label">Marge restante</span>
+                <span class="m-result-main-val">49 300€</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <button class="btn-upgrade" onclick="openModal()">Essai gratuit 7 jours →</button>
   </div>
-</main>
 
-<!-- MODAL PRO -->
+  <!-- ENTREPRISE -->
 
-<div class="modal-overlay" id="proModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
-    <h2>✦ Planify Pro</h2>
-    <p>7 jours gratuits, sans engagement, sans carte bancaire.</p>
-    <div class="price-cards">
-      <div class="price-card selected" onclick="selectPlan(this)"><div class="price-amount">4,99<span>€/mois</span></div><div class="price-label">Mensuel</div></div>
-      <div class="price-card popular" onclick="selectPlan(this)"><div class="price-amount">29,99<span>€/an</span></div><div class="price-label">Annuel · Économise 40%</div></div>
+  <div class="iface" id="iface-ent">
+    <div class="iface-frame">
+      <div class="iface-topbar ent">
+        <div class="tdots"><div class="td r"></div><div class="td y"></div><div class="td g"></div></div>
+        <div class="turl">app.planify.fr/entreprise/dashboard</div>
+        <div class="tbadge ent">🏢 Espace Entreprise</div>
+      </div>
+      <div class="iface-body">
+        <div class="mini-sidebar">
+          <div class="ms-logo ent">⚡ Planify</div>
+          <div class="ms-nav a ent">▦ &nbsp;Dashboard RH</div>
+          <div class="ms-nav">👥 &nbsp;Salariés</div>
+          <div class="ms-nav">📋 &nbsp;Bulletins de paie</div>
+          <div class="ms-nav">🏖 &nbsp;Congés & absences</div>
+          <div class="ms-nav">🧾 &nbsp;Notes de frais</div>
+          <div class="ms-sect">Pro</div>
+          <div class="ms-nav">📊 &nbsp;Reporting RH</div>
+          <div class="ms-nav">🔒 &nbsp;Coffre-fort docs</div>
+          <div class="ms-nav">📤 &nbsp;Export DSN</div>
+        </div>
+        <div class="mini-content">
+          <div class="m-stats">
+            <div class="m-stat"><div class="m-stat-label">Salariés actifs</div><div class="m-stat-val" style="color:var(--ent)">24</div></div>
+            <div class="m-stat"><div class="m-stat-label">Masse salariale</div><div class="m-stat-val" style="color:#38bdf8">48 200€</div></div>
+            <div class="m-stat"><div class="m-stat-label">Congés en attente</div><div class="m-stat-val" style="color:var(--free)">7</div></div>
+          </div>
+          <div class="m-row">
+            <div class="m-row-left">
+              <div class="m-row-title">Masse salariale — 6 mois</div>
+              <div class="m-bars">
+                <div class="m-bar ent" style="height:70%"></div>
+                <div class="m-bar ent" style="height:75%"></div>
+                <div class="m-bar ent" style="height:68%"></div>
+                <div class="m-bar ent" style="height:82%"></div>
+                <div class="m-bar ent" style="height:90%"></div>
+                <div class="m-bar ent" style="height:100%"></div>
+              </div>
+            </div>
+            <div class="m-result">
+              <div class="m-row-title">Bulletins juin 2026</div>
+              <div class="m-result-row"><span class="m-result-label">Générés</span><span class="m-result-val" style="color:var(--emerald)">21 / 24</span></div>
+              <div class="m-result-row"><span class="m-result-label">En attente</span><span class="m-result-val" style="color:var(--free)">3</span></div>
+              <div class="m-result-main">
+                <span class="m-result-main-label">Virements à valider</span>
+                <span class="m-result-main-val">3 restants</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="modal-features">
-      <div class="modal-feat"><span class="icon">✓</span> Projection intelligente fin de mois</div>
-      <div class="modal-feat"><span class="icon">✓</span> Simulateur d'heures supplémentaires</div>
-      <div class="modal-feat"><span class="icon">✓</span> Objectifs d'épargne personnalisés</div>
-      <div class="modal-feat"><span class="icon">✓</span> Graphique des gains par semaine</div>
-      <div class="modal-feat"><span class="icon">✓</span> Historique des 12 derniers mois</div>
-    </div>
-    <div id="paypal-button-container-P-1K151518PH061963RNH37Y4Y" style="margin-bottom:8px;"></div>
-    <div id="paypal-button-container-P-71U27989G3114384ANH4SRCQ" style="margin-bottom:12px;"></div>
-    <p style="text-align:center;font-size:0.73rem;color:var(--muted);margin:0;">7 jours gratuits · Annulable à tout moment</p>
   </div>
 </div>
 
-<!-- MODAL AUTH (optionnel) -->
+<!-- STATS BAND -->
 
-<div class="modal-overlay" id="authModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeAuthModal()">×</button>
-    <h2 id="authModalTitle">Connexion</h2>
-    <p>Sauvegarde tes données dans le cloud et accède à Planify depuis n'importe quel appareil.</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
-      <button class="auth-tab" onclick="switchAuthTab('signup')">Inscription</button>
-    </div>
-    <div class="auth-error" id="authError"></div>
-    <div class="auth-success" id="authSuccess"></div>
-    <label>Adresse email</label>
-    <input type="email" class="auth-input" id="authEmail" placeholder="ton@email.fr">
-    <label>Mot de passe</label>
-    <input type="password" class="auth-input" id="authPassword" placeholder="••••••••">
-    <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuth()" style="margin-top:4px;">Se connecter</button>
-    <p style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:16px;">Tu peux utiliser Planify sans compte — la connexion est optionnelle.</p>
+<div class="stats-band">
+  <div class="stats-inner">
+    <div class="band-stat"><div class="band-num">35K+</div><div class="band-label">Utilisateurs actifs</div></div>
+    <div class="band-stat"><div class="band-num">4,9★</div><div class="band-label">Note moyenne</div></div>
+    <div class="band-stat"><div class="band-num">€240M</div><div class="band-label">Revenus suivis</div></div>
+    <div class="band-stat"><div class="band-num">3</div><div class="band-label">Espaces distincts</div></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- FONCTIONNALITÉS -->
+
+<section class="section" id="fonctionnalites">
+  <div class="section-tag">Fonctionnalités</div>
+  <h2 class="section-h">Tout ce qu'il vous faut, selon votre profil</h2>
+  <p class="section-sub">Chaque espace est pensé pour les besoins réels de ses utilisateurs.</p>
+
+  <div class="feat-tabs">
+    <button class="ftab on-sal" onclick="showFeat('sal',this)">👔 Salarié</button>
+    <button class="ftab" onclick="showFeat('free',this)">💻 Freelance</button>
+    <button class="ftab" onclick="showFeat('ent',this)">🏢 Entreprise</button>
+  </div>
+
+  <!-- SALARIÉ FEATURES -->
+
+  <div class="feat-panel visible" id="feat-sal">
+    <div class="fc sal"><div class="fc-icon">🧮</div><h3>Calcul net/brut auto</h3><p>Entrez votre brut, obtenez votre net instantanément selon votre contrat (CDI, CDD, intérim, apprenti, cadre).</p></div>
+    <div class="fc sal"><div class="fc-icon">📅</div><h3>Planning de travail</h3><p>Visualisez vos jours travaillés, repos et heures supplémentaires sur un calendrier interactif.</p></div>
+    <div class="fc sal"><div class="fc-icon">🎯</div><h3>Objectifs financiers</h3><p>Fixez un objectif mensuel de revenus et suivez votre progression en temps réel.</p></div>
+    <div class="fc sal"><div class="fc-icon">📄</div><div class="fc-pro sal">Pro</div><h3>Export PDF mensuel</h3><p>Générez un récapitulatif complet de vos revenus, idéal pour un dossier de crédit ou la CAF.</p></div>
+    <div class="fc sal"><div class="fc-icon">📊</div><div class="fc-pro sal">Pro</div><h3>Statistiques avancées</h3><p>Évolution de vos revenus, comparaisons mois par mois, projection annuelle.</p></div>
+    <div class="fc sal"><div class="fc-icon">🔔</div><div class="fc-pro sal">Pro</div><h3>Alertes personnalisées</h3><p>Notification quand votre salaire est versé, rappel pour vos déclarations, alerte objectif atteint.</p></div>
+  </div>
+
+  <!-- FREELANCE FEATURES -->
+
+  <div class="feat-panel" id="feat-free">
+    <div class="fc free"><div class="fc-icon">🏪</div><h3>Simulateur AE</h3><p>Calculez vos cotisations URSSAF auto-entrepreneur en temps réel selon votre activité (BIC, BNC, libérale).</p></div>
+    <div class="fc free"><div class="fc-icon">📈</div><h3>Suivi du chiffre d'affaires</h3><p>Enregistrez chaque mission ou paiement et visualisez votre CA mensuel et annuel.</p></div>
+    <div class="fc free"><div class="fc-icon">⚠️</div><h3>Alerte plafond AE</h3><p>Soyez notifié quand vous approchez du seuil de chiffre d'affaires auto-entrepreneur.</p></div>
+    <div class="fc free"><div class="fc-icon">🧾</div><h3>Devis & factures</h3><p class="fc-pro free">Pro</p>Créez et envoyez des devis et factures professionnels directement depuis l'app.</div>
+    <div class="fc free"><div class="fc-icon">💳</div><div class="fc-pro free">Pro</div><h3>Suivi de trésorerie</h3><p>Visualisez vos entrées/sorties, anticipez vos cotisations et planifiez vos dépenses.</p></div>
+    <div class="fc free"><div class="fc-icon">📤</div><div class="fc-pro free">Pro</div><h3>Export comptable</h3><p>Exportez vos données en format compatible avec votre expert-comptable (CSV, PDF, Excel).</p></div>
+  </div>
+
+  <!-- ENTREPRISE FEATURES -->
+
+  <div class="feat-panel" id="feat-ent">
+    <div class="fc ent"><div class="fc-icon">👥</div><h3>Gestion des salariés</h3><p>Fiches employés complètes, contrats, historique, documents RH centralisés et accessibles.</p></div>
+    <div class="fc ent"><div class="fc-icon">📋</div><h3>Bulletins de paie</h3><p>Générez et distribuez les bulletins de paie en quelques clics. Coffre-fort numérique inclus.</p></div>
+    <div class="fc ent"><div class="fc-icon">🏖</div><h3>Congés & absences</h3><p>Système de demande/validation de congés, suivi des absences, soldes en temps réel par salarié.</p></div>
+    <div class="fc ent"><div class="fc-icon">🧾</div><h3>Notes de frais</h3><p>Vos salariés soumettent leurs frais via l'app, vous validez en un clic. Remboursement tracé.</p></div>
+    <div class="fc ent"><div class="fc-icon">📊</div><h3>Reporting RH avancé</h3><p>Masse salariale, coût employeur, pyramide des âges, absentéisme — tous les indicateurs RH clés.</p></div>
+    <div class="fc ent"><div class="fc-icon">📤</div><h3>Export DSN & comptable</h3><p>Préparez vos déclarations sociales nominatives et exportez vers votre logiciel comptable.</p></div>
+  </div>
+</section>
+
+<!-- TARIFS -->
+
+<section class="pricing-section" id="tarifs">
+  <div class="pricing-head">
+    <div class="section-tag" style="justify-content:center">Tarifs</div>
+    <h2 class="section-h">Un prix par profil, transparent</h2>
+    <p class="section-sub" style="margin:0 auto 28px">Commencez gratuitement. Passez Pro quand vous en avez besoin.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <!-- SALARIÉ -->
+    <div class="pc sal">
+      <div class="pc-for sal">👔 Salarié</div>
+      <div class="pc-name">Planify Salarié Pro</div>
+      <div class="pc-price sal" id="price-sal">11,99€</div>
+      <div class="pc-period" id="period-sal">par mois · sans engagement</div>
+      <ul class="pc-features">
+        <li><span class="ck" style="color:var(--muted)">○</span>Calcul net/brut illimité</li>
+        <li><span class="ck" style="color:var(--muted)">○</span>Dashboard & planning de base</li>
+        <li><span class="ck" style="color:var(--muted)">○</span>3 mois d'historique</li>
+        <li style="list-style:none;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">✦ Inclus dans Pro</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Historique illimité</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Export PDF mensuel & annuel</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Statistiques & prévisions avancées</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Alertes & rappels personnalisés</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Multi-emplois (jusqu'à 5 postes)</li>
+        <li class="pro-feat"><span class="ck" style="color:var(--sal)">✓</span>Support prioritaire</li>
+      </ul>
+      <div id="paypal-button-container-P-1R482671C0521052NNIPDJCA" style="margin-top:8px;"></div>
+    </div>
+
+```
+<!-- FREELANCE -->
+<div class="pc free">
+  <div class="pc-for free">💻 Freelance / AE</div>
+  <div class="pc-name">Planify Freelance Pro</div>
+  <div class="pc-price free" id="price-free">18,99€</div>
+  <div class="pc-period" id="period-free">par mois · sans engagement</div>
+  <ul class="pc-features">
+    <li><span class="ck" style="color:var(--muted)">○</span>Simulateur AE & cotisations</li>
+    <li><span class="ck" style="color:var(--muted)">○</span>Suivi CA mensuel</li>
+    <li><span class="ck" style="color:var(--muted)">○</span>Alerte plafond AE</li>
+    <li style="list-style:none;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">✦ Inclus dans Pro</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Devis & factures illimités</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Suivi de trésorerie complet</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Export comptable (CSV, PDF, Excel)</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Gestion multi-activités (BIC + BNC)</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Rappels cotisations URSSAF</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--free)">✓</span>Support prioritaire</li>
+  </ul>
+  <div id="paypal-button-container-P-90L999057V426211WNIPDLFA" style="margin-top:8px;"></div>
+</div>
+
+<!-- ENTREPRISE -->
+<div class="pc ent">
+  <div class="pc-top-tag ent">⚡ Recommandé</div>
+  <div class="pc-for ent">🏢 Entreprise</div>
+  <div class="pc-name">Planify Entreprise Pro</div>
+  <div class="pc-price ent" id="price-ent">38,99€</div>
+  <div class="pc-period" id="period-ent">par mois · jusqu'à 10 salariés · sans engagement</div>
+  <ul class="pc-features">
+    <li><span class="ck" style="color:var(--muted)">○</span>Gestion jusqu'à 3 salariés</li>
+    <li><span class="ck" style="color:var(--muted)">○</span>Bulletins de paie basiques</li>
+    <li><span class="ck" style="color:var(--muted)">○</span>Suivi congés simple</li>
+    <li style="list-style:none;border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">✦ Inclus dans Pro</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Salariés illimités</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Bulletins de paie automatisés</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Coffre-fort numérique des docs</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Notes de frais & validation</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Reporting RH complet</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Export DSN & comptable</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Multi-établissements</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Accès manager + RH séparés</li>
+    <li class="pro-feat"><span class="ck" style="color:var(--ent)">✓</span>Support dédié 7j/7</li>
+  </ul>
+  <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:12px;font-style:italic;">Toute votre RH, en un clic. 38,99€/mois.</p>
+  <div id="paypal-button-container-P-3R822662UC743362XNIPDNZI" style="margin-top:8px;"></div>
+</div>
+```
+
+  </div>
+
+  <p style="text-align:center;color:var(--muted);font-size:.78rem;margin-top:24px;font-family:'JetBrains Mono',monospace;">
+    Entreprise +10 salariés ? <span style="color:var(--ent);cursor:pointer">Contactez-nous pour un tarif sur mesure →</span>
+  </p>
+</section>
+
+<!-- FAQ -->
+
+<section class="faq-section" id="faq">
+  <div class="section-tag" style="justify-content:center;margin-bottom:28px">FAQ</div>
+  <h2 class="section-h" style="text-align:center;margin-bottom:36px">Questions fréquentes</h2>
+
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Puis-je changer d'espace (Salarié → Freelance) sans repayer ?</div>
+    <div class="faq-a">Oui, totalement. Vous pouvez switcher entre les espaces à tout moment depuis votre compte, sans frais supplémentaires. Vos données sont conservées dans chaque espace.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Le plan gratuit est-il vraiment gratuit pour toujours ?</div>
+    <div class="faq-a">Oui. Le plan gratuit n'a pas de limite de temps. Vous pouvez utiliser les fonctionnalités de base indéfiniment sans carte bancaire.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">J'ai à la fois un CDI et une activité auto-entrepreneur — quel espace choisir ?</div>
+    <div class="faq-a">Vous pouvez activer plusieurs espaces simultanément. Les données restent séparées mais le dashboard principal consolide tous vos revenus en un seul endroit.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">L'espace Entreprise est-il compatible avec mon expert-comptable ?</div>
+    <div class="faq-a">Oui. L'espace Entreprise Pro permet l'export en formats compatibles avec les principaux logiciels comptables français. L'export DSN est également disponible.</div>
+  </div>
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q">Mes données sont-elles sécurisées ?</div>
+    <div class="faq-a">Vos données sont chiffrées de bout en bout et hébergées en Europe. Nous ne les revendons jamais. Conformité RGPD totale.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+
+<footer>
+  <div class="footer-logo">⚡ Planify</div>
+  <div class="footer-links">
+    <a href="#">À propos</a>
+    <a href="#">CGU</a>
+    <a href="#">Confidentialité</a>
+    <a href="#">Contact</a>
+    <a href="#">Affiliés</a>
+  </div>
+  <div class="footer-copy">© 2026 Planify · Fait en France 🇫🇷</div>
+</footer>
 
 <script>
-  // SUPABASE
-  const SUPABASE_URL = 'https://bqrdybvrvakszfxdnzxu.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_hLVwtzGlLM09raqYklh3-w__rHWiQrq';
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  let currentUser = null;
-  let isPro = false;
-  let authMode = 'login';
-  let saveTimeout = null;
-
-  let state = {
-    salaire: 0, joursParMois: 22, heureDebut: '09:00', heureFin: '17:00',
-    pause: 60, modeCalc: 'jours', workedDays: {},
-    currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear(),
-    objectif: 0
-  };
-
-  const today = new Date();
-  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  const DAYS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-
-  // INIT - Load local state first, then check auth
-  loadFromLocal();
-  updateMonthDisplay();
-  renderCalendar();
-  updateStats();
-  applyProState();
-
-  // Check if user is already logged in
-  sb.auth.getSession().then(({ data: { session } }) => {
-    if (session?.user) {
-      setUser(session.user);
-    }
+function selectSpace(s) {
+  // cards
+  document.querySelectorAll('.space-card').forEach(c => c.classList.remove('active'));
+  document.querySelector('.space-card.' + s).classList.add('active');
+  // switch btns
+  document.querySelectorAll('.sw-btn').forEach(b => { b.className = 'sw-btn'; });
+  const sw = document.getElementById('sw-' + s);
+  sw.classList.add('on-' + s);
+  // interfaces — retrigger animation
+  document.querySelectorAll('.iface').forEach(i => {
+    i.classList.remove('visible');
+    i.style.animation = 'none';
   });
+  const target = document.getElementById('iface-' + s);
+  target.classList.add('visible');
+  target.style.animation = '';
+  void target.offsetWidth; // force reflow
+  target.style.animation = 'up .45s ease both';
+  // scroll to preview smoothly
+  target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (session?.user) {
-      setUser(session.user);
-    } else {
-      currentUser = null;
-      document.getElementById('accountBanner').style.display = 'flex';
-      document.getElementById('userChip').classList.add('hidden');
-      document.getElementById('logoutBtn').classList.add('hidden');
-    }
-  });
+function showFeat(s, btn) {
+  document.querySelectorAll('.ftab').forEach(b => b.className = 'ftab');
+  btn.classList.add('on-' + s);
+  document.querySelectorAll('.feat-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('feat-' + s).classList.add('visible');
+}
 
-  async function setUser(user) {
-    currentUser = user;
-    document.getElementById('accountBanner').style.display = 'none';
-    document.getElementById('userChip').classList.remove('hidden');
-    document.getElementById('logoutBtn').classList.remove('hidden');
-    document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
-    document.getElementById('userEmailDisplay').textContent = user.email;
-    await loadFromSupabase();
-    updateMonthDisplay(); renderCalendar(); updateStats(); applyProState();
-  }
 
-  async function logout() {
-    await sb.auth.signOut();
-    showToast('👋 Déconnecté');
+// PayPal Salarié
+paypal.Buttons({
+  style: { shape: 'rect', color: 'white', layout: 'vertical', label: 'subscribe' },
+  createSubscription: function(data, actions) {
+    return actions.subscription.create({ plan_id: 'P-1R482671C0521052NNIPDJCA' });
+  },
+  onApprove: function(data, actions) {
+    window.location.href = '?subscribed=salarie&id=' + data.subscriptionID;
   }
+}).render('#paypal-button-container-P-1R482671C0521052NNIPDJCA');
 
-  // AUTH
-  function openAuthModal(mode) {
-    authMode = mode || 'login';
-    switchAuthTab(authMode);
-    document.getElementById('authModal').classList.add('open');
+// PayPal Freelance
+paypal.Buttons({
+  style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
+  createSubscription: function(data, actions) {
+    return actions.subscription.create({ plan_id: 'P-90L999057V426211WNIPDLFA' });
+  },
+  onApprove: function(data, actions) {
+    window.location.href = '?subscribed=freelance&id=' + data.subscriptionID;
   }
-  function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); }
-  function switchAuthTab(mode) {
-    authMode = mode;
-    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='signup')));
-    document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Se connecter' : "S'inscrire";
-    document.getElementById('authModalTitle').textContent = mode === 'login' ? 'Connexion' : 'Créer un compte';
-    document.getElementById('authError').style.display = 'none';
-    document.getElementById('authSuccess').style.display = 'none';
-  }
+}).render('#paypal-button-container-P-90L999057V426211WNIPDLFA');
 
-  async function handleAuth() {
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
-    const btn = document.getElementById('authSubmitBtn');
-    const errEl = document.getElementById('authError');
-    const sucEl = document.getElementById('authSuccess');
-    errEl.style.display = 'none'; sucEl.style.display = 'none';
-    if (!email || !password) { errEl.textContent = 'Remplis tous les champs.'; errEl.style.display = 'block'; return; }
-    btn.disabled = true; btn.textContent = '...';
-    try {
-      if (authMode === 'login') {
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        closeAuthModal();
-        showToast('✅ Connecté ! Tes données sont synchronisées.');
-      } else {
-        const { error } = await sb.auth.signUp({ email, password });
-        if (error) throw error;
-        sucEl.textContent = '✅ Compte créé ! Tu es maintenant connecté.';
-        sucEl.style.display = 'block';
-      }
-    } catch (e) {
-      errEl.textContent = e.message.includes('Invalid') ? 'Email ou mot de passe incorrect.' : e.message;
-      errEl.style.display = 'block';
-    }
-    btn.disabled = false; btn.textContent = authMode === 'login' ? 'Se connecter' : "S'inscrire";
+// PayPal Entreprise
+paypal.Buttons({
+  style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
+  createSubscription: function(data, actions) {
+    return actions.subscription.create({ plan_id: 'P-3R822662UC743362XNIPDNZI' });
+  },
+  onApprove: function(data, actions) {
+    window.location.href = '?subscribed=entreprise&id=' + data.subscriptionID;
   }
+}).render('#paypal-button-container-P-3R822662UC743362XNIPDNZI');
 
-  // DATA
-  async function loadFromSupabase() {
-    try {
-      const { data } = await sb.from('planify_data').select('*').eq('user_id', currentUser.id).single();
-      if (data?.data) {
-        const saved = data.data;
-        state = { ...state, ...saved };
-        isPro = saved.isPro || false;
-        syncInputsFromState();
-      }
-    } catch(e) {}
-  }
-
-  async function saveToSupabase() {
-    if (!currentUser) return;
-    document.getElementById('savingIndicator').style.display = 'flex';
-    try {
-      await sb.from('planify_data').upsert({ user_id: currentUser.id, data: { ...state, isPro }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
-    } catch(e) {}
-    setTimeout(() => document.getElementById('savingIndicator').style.display = 'none', 1000);
-  }
-
-  function loadFromLocal() {
-    try {
-      const s = localStorage.getItem('planify_v3');
-      if (s) {
-        const p = JSON.parse(s);
-        state = { ...state, ...p };
-        isPro = p.isPro || false;
-        syncInputsFromState();
-      }
-    } catch(e) {}
-  }
-
-  function syncInputsFromState() {
-    document.getElementById('salaire').value = state.salaire || '';
-    document.getElementById('joursParMois').value = state.joursParMois || 22;
-    document.getElementById('heureDebut').value = state.heureDebut || '09:00';
-    document.getElementById('heureFin').value = state.heureFin || '17:00';
-    document.getElementById('pause').value = state.pause || 60;
-    document.getElementById('modeCalc').value = state.modeCalc || 'jours';
-    if (state.objectif) document.getElementById('objInput').value = state.objectif;
-  }
-
-  function scheduleSave() {
-    // Save locally always
-    try { localStorage.setItem('planify_v3', JSON.stringify({ ...state, isPro })); } catch(e) {}
-    // Save to cloud if logged in
-    if (currentUser) {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(saveToSupabase, 1500);
-    }
-  }
-
-  // APP LOGIC
-  function updateMonthDisplay() { document.getElementById('monthDisplay').textContent = MONTHS[state.currentMonth]+' '+state.currentYear; }
-  function changeMonth(dir) {
-    state.currentMonth += dir;
-    if(state.currentMonth>11){state.currentMonth=0;state.currentYear++;}
-    if(state.currentMonth<0){state.currentMonth=11;state.currentYear--;}
-    updateMonthDisplay(); renderCalendar(); updateStats();
-  }
-  function saveConfig() {
-    state.salaire = parseFloat(document.getElementById('salaire').value)||0;
-    state.joursParMois = parseInt(document.getElementById('joursParMois').value)||22;
-    state.heureDebut = document.getElementById('heureDebut').value;
-    state.heureFin = document.getElementById('heureFin').value;
-    state.pause = parseInt(document.getElementById('pause').value)||60;
-    state.modeCalc = document.getElementById('modeCalc').value;
-    scheduleSave(); updateStats(); showToast('✅ Configuration enregistrée !');
-  }
-  function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
-  function getMonthKey(){return `${state.currentYear}-${state.currentMonth}`;}
-  function getWorkedDays(){return state.workedDays[getMonthKey()]||[];}
-  function toggleDay(d) {
-    const key=getMonthKey();
-    if(!state.workedDays[key])state.workedDays[key]=[];
-    const idx=state.workedDays[key].indexOf(d);
-    if(idx>=0)state.workedDays[key].splice(idx,1);
-    else{state.workedDays[key].push(d);state.workedDays[key].sort((a,b)=>a-b);}
-    scheduleSave(); renderCalendar(); updateStats();
-  }
-  function renderCalendar() {
-    const grid=document.getElementById('calendarGrid'); grid.innerHTML='';
-    const dim=getDaysInMonth(state.currentYear,state.currentMonth);
-    const worked=getWorkedDays();
-    for(let d=1;d<=dim;d++){
-      const date=new Date(state.currentYear,state.currentMonth,d);
-      const dow=date.getDay();
-      const el=document.createElement('div');
-      el.className='day-card'+(worked.includes(d)?' worked':'')+(d===today.getDate()&&state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()?' today':'')+(date<new Date(today.getFullYear(),today.getMonth(),today.getDate())&&!(d===today.getDate()&&state.currentMonth===today.getMonth())?' past':'')+(dow===0||dow===6?' weekend':'');
-      el.innerHTML=`<div class="day-check"></div><div class="day-name">${DAYS[dow]}</div><div class="day-num">${d}</div>`;
-      el.onclick=()=>toggleDay(d);
-      grid.appendChild(el);
-    }
-  }
-  function hoursPerDay(){const [sh,sm]=state.heureDebut.split(':').map(Number);const [eh,em]=state.heureFin.split(':').map(Number);return Math.max(0,((eh*60+em)-(sh*60+sm)-state.pause)/60);}
-  function getEarnPerDay(){const hpd=hoursPerDay();if(state.modeCalc==='jours')return state.joursParMois>0?state.salaire/state.joursParMois:0;return state.joursParMois>0?(state.salaire/(state.joursParMois*hpd))*hpd:0;}
-  function updateStats(){
-    const worked=getWorkedDays();const nb=worked.length;const dim=getDaysInMonth(state.currentYear,state.currentMonth);
-    const hpd=hoursPerDay();const epd=getEarnPerDay();const gagne=nb*epd;
-    let joursR=0;
-    if(state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()){for(let d=today.getDate()+1;d<=dim;d++){const dow=new Date(state.currentYear,state.currentMonth,d).getDay();if(dow!==0&&dow!==6)joursR++;}}
-    let pct=state.joursParMois>0?Math.min(100,Math.round((nb/state.joursParMois)*100)):0;
-    document.getElementById('statGagne').textContent=fmt(gagne);
-    document.getElementById('statRestantJours').textContent=state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()?joursR+' j':'—';
-    document.getElementById('statRestantSalaire').textContent=fmt(Math.max(0,state.salaire-gagne));
-    document.getElementById('statHeures').textContent=Math.round(nb*hpd)+' h';
-    document.getElementById('pctDisplay').textContent=pct+'%';
-    document.getElementById('progressBar').style.width=pct+'%';
-    document.getElementById('progressLeft').textContent=nb+' / '+state.joursParMois+' jours effectués';
-    document.getElementById('progressRight').textContent=state.salaire>0?fmt(gagne)+' / '+fmt(state.salaire):'';
-    renderShiftList(worked,epd,hpd);
-    if(isPro){renderWeekChart(worked,epd);updateProjection(nb,epd,dim);updateSim(document.getElementById('simSlider').value,true);if(state.objectif>0)updateObjectifProgress(gagne,epd);}
-  }
-  function renderShiftList(worked,epd,hpd){
-    const list=document.getElementById('shiftList');
-    document.getElementById('shiftCount').textContent=worked.length+' jour(s)';
-    if(!worked.length){list.innerHTML='<div class="empty-state"><span class="emoji">👆</span>Clique sur un jour dans le calendrier</div>';return;}
-    list.innerHTML='';
-    worked.forEach(d=>{const dow=DAYS[new Date(state.currentYear,state.currentMonth,d).getDay()];const item=document.createElement('div');item.className='shift-item';item.innerHTML=`<div class="shift-date">${dow} ${d} ${MONTHS[state.currentMonth].substring(0,3)}.</div><div class="shift-hours">⏱ ${state.heureDebut} → ${state.heureFin} (${hpd.toFixed(1)}h)</div><div class="shift-earn">+${fmt(epd)}</div><button class="btn btn-danger" onclick="toggleDay(${d})">✕</button>`;list.appendChild(item);});
-  }
-  function renderWeekChart(worked,epd){
-    const c=document.getElementById('weekChart');if(!worked.length){c.innerHTML='';return;}
-    const weeks={};worked.forEach(d=>{const wk=Math.ceil(d/7);weeks[wk]=(weeks[wk]||0)+1;});
-    const maxE=Math.max(...Object.values(weeks))*epd;
-    c.innerHTML='<hr class="divider"><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:12px;color:var(--muted);">Gains par semaine</div>';
-    Object.entries(weeks).forEach(([wk,days])=>{const earn=days*epd;const pct=maxE>0?(earn/maxE*100):0;c.innerHTML+=`<div class="earn-bar-item"><div class="earn-bar-label">Sem. ${wk}</div><div class="earn-bar-track"><div class="earn-bar-fill" style="width:${pct}%"></div></div><div class="earn-bar-val">${fmt(earn)}</div></div>`;});
-  }
-  function countOuvrables(y,m,from,to){from=from||1;to=to||getDaysInMonth(y,m);let n=0;for(let d=from;d<=to;d++){const dow=new Date(y,m,d).getDay();if(dow!==0&&dow!==6)n++;}return n;}
-  function updateProjection(nb,epd,dim){
-    const totOuvr=countOuvrables(state.currentYear,state.currentMonth);
-    const dayNow=state.currentMonth===today.getMonth()&&state.currentYear===today.getFullYear()?today.getDate():dim;
-    const passedOuvr=countOuvrables(state.currentYear,state.currentMonth,1,dayNow);
-    const rythme=passedOuvr>0?nb/passedOuvr:0;
-    document.getElementById('projTotal').textContent=fmt(rythme*totOuvr*epd);
-    document.getElementById('projJoursManquants').textContent=Math.max(0,Math.round(rythme*totOuvr)-nb)+' j';
-    document.getElementById('projRythme').textContent=fmt(epd)+'/j';
-  }
-  function updateSim(val,silent){
-    val=parseInt(val)||0;const epd=getEarnPerDay();const actuel=getWorkedDays().length*epd;
-    document.getElementById('simSliderVal').textContent='+'+val+' j';
-    document.getElementById('simGainExtra').textContent='+'+fmt(val*epd);
-    document.getElementById('simTotal').textContent=fmt(actuel+val*epd);
-    const slider=document.getElementById('simSlider');
-    slider.style.setProperty('--range-pct',((val-slider.min)/(slider.max-slider.min)*100)+'%');
-  }
-  function setObjectif(){
-    const val=parseFloat(document.getElementById('objInput').value)||0;
-    state.objectif=val;scheduleSave();
-    if(val>0){document.getElementById('objProgressWrap').style.display='block';updateObjectifProgress(getWorkedDays().length*getEarnPerDay(),getEarnPerDay());showToast('🎯 Objectif : '+fmt(val));}
-  }
-  function updateObjectifProgress(gagne,epd){
-    if(!state.objectif)return;
-    const pct=Math.min(100,Math.round((gagne/state.objectif)*100));
-    const joursN=epd>0?Math.ceil(state.objectif/epd):0;
-    document.getElementById('objProgressLabel').textContent=fmt(gagne)+' / '+fmt(state.objectif);
-    document.getElementById('objProgressPct').textContent=pct+'%';
-    document.getElementById('objBarFill').style.width=pct+'%';
-    document.getElementById('objJoursNecessaires').textContent=joursN+' j';
-    document.getElementById('objJoursRestants').textContent=Math.max(0,joursN-getWorkedDays().length)+' j';
-    document.getElementById('objProgressWrap').style.display='block';
-  }
-  function activatePro(){isPro=true;closeModal();applyProState();updateStats();scheduleSave();showToast('🎉 Bienvenue dans Planify Pro !');}
-  function applyProState(){
-    ['proj','sim','obj'].forEach(id=>{
-      const blur=document.getElementById(id+'Blur');const overlay=document.getElementById(id+'Wrapper').querySelector('.pro-lock-overlay');
-      if(isPro){blur.style.filter='none';blur.style.opacity='1';blur.style.pointerEvents='auto';overlay.style.display='none';}
-      else{blur.style.filter='blur(5px)';blur.style.opacity='0.5';blur.style.pointerEvents='none';overlay.style.display='flex';}
-    });
-    document.getElementById('planChip').textContent=isPro?'✦ Pro':'Gratuit';
-    document.getElementById('planChip').className='plan-chip '+(isPro?'pro':'free');
-    document.getElementById('headerUpgradeBtn').style.display=isPro?'none':'';
-    document.getElementById('promoBanner').style.display=isPro?'none':'flex';
-  }
-  function cocheToutJourOuvrable(){const key=getMonthKey();const dim=getDaysInMonth(state.currentYear,state.currentMonth);state.workedDays[key]=[];for(let d=1;d<=dim;d++){const dow=new Date(state.currentYear,state.currentMonth,d).getDay();if(dow!==0&&dow!==6)state.workedDays[key].push(d);}scheduleSave();renderCalendar();updateStats();showToast('✅ Tous les jours ouvrables cochés !');}
-  function resetMonth(){state.workedDays[getMonthKey()]=[];scheduleSave();renderCalendar();updateStats();showToast('🗑 Planning réinitialisé');}
-  function fmt(n){return (Math.round(n*100)/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
-  function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-  function openModal(){document.getElementById('proModal').classList.add('open');}
-  function closeModal(){document.getElementById('proModal').classList.remove('open');}
-  document.getElementById('proModal').addEventListener('click',e=>{if(e.target===document.getElementById('proModal'))closeModal();});
-  document.getElementById('authModal').addEventListener('click',e=>{if(e.target===document.getElementById('authModal'))closeAuthModal();});
-  function selectPlan(el){document.querySelectorAll('.price-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
-  document.getElementById('authPassword').addEventListener('keypress',e=>{if(e.key==='Enter')handleAuth();});
-</script>
-
-<script src="https://www.paypal.com/sdk/js?client-id=Ae2q3LX6ogLzcK33ZAOqWjFAspwXWApfSuPFZ7oBwFicAmrYa4PLEq_DUDwSa8vJ1Xp_kdlktTVn9RVg&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
-
-<script>
-  function initPayPal() {
-    if (typeof paypal === 'undefined') { setTimeout(initPayPal, 500); return; }
-    paypal.Buttons({
-      style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'subscribe' },
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({ plan_id: 'P-1K151518PH061963RNH37Y4Y' });
-      },
-      onApprove: function(data) {
-        activatePro();
-        showToast('🎉 Paiement confirmé ! Bienvenue dans Planify Pro !');
-      },
-      onError: function() { showToast('❌ Erreur de paiement. Réessaie.'); }
-    }).render("#paypal-button-container-P-1K151518PH061963RNH37Y4Y");
-
-    paypal.Buttons({
-      style: { shape: "pill", color: "black", layout: "vertical", label: "subscribe" },
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({ plan_id: "P-71U27989G3114384ANH4SRCQ" });
-      },
-      onApprove: function(data) {
-        activatePro();
-        showToast("🎉 Paiement confirmé ! Bienvenue dans Planify Pro !");
-      },
-      onError: function() { showToast("❌ Erreur de paiement. Réessaie."); }
-    }).render("#paypal-button-container-P-71U27989G3114384ANH4SRCQ");
-  }
-  initPayPal();
 </script>
 
 </body>
